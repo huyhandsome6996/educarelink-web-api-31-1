@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ sơ cá nhân</title>
+</head>
+<body>
+
+<h2>Hồ sơ cá nhân</h2>
+
+<div id="info">Đang tải...</div>
+
+<hr>
+
+<button disabled>Cập nhật (Đang phát triển)</button>
+
+<br><br>
+<a href="/account/">← Quay lại</a>
+
+<script>
+async function loadProfile(){
+    const res = await fetch("/api/me/");
+    const data = await res.json();
+
+    if(!data.login){
+        window.location = "/dangnhap/";
+        return;
+    }
+
+    document.getElementById("info").innerHTML = `
+        <p><b>Tên đăng nhập:</b> ${data.username}</p>
+        <p><b>User ID:</b> ${data.user_id}</p>
+        <p><b>Email:</b> (chưa hiển thị)</p>
+        <p><b>Số điện thoại:</b> (đang phát triển)</p>
+    `;
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>

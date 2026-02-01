@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký - EduCare Link</title>
+</head>
+<body>
+
+<h2>Đăng ký tài khoản phụ huynh</h2>
+
+<label>Tên đăng nhập</label><br>
+<input id="username" placeholder="Username"><br><br>
+
+<label>Email</label><br>
+<input id="email" placeholder="Email"><br><br>
+
+<label>Mật khẩu</label><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<label>Nhập lại mật khẩu</label><br>
+<input id="password2" type="password" placeholder="Repeat Password"><br><br>
+
+<button onclick="register()">Đăng ký</button>
+
+<p id="msg" style="color:red;"></p>
+
+<hr>
+
+<p>
+    Đã có tài khoản?
+    <a href="/dangnhap/">Đăng nhập</a>
+</p>
+
+<script>
+async function register(){
+    msg.innerText = "";
+
+    if(password.value !== password2.value){
+        msg.innerText = "Mật khẩu không khớp";
+        return;
+    }
+
+    const res = await fetch("/api/dangky/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+            email: email.value
+        })
+    });
+
+    const data = await res.json();
+
+    if(data.status === "ok"){
+        alert("Đăng ký thành công, vui lòng đăng nhập");
+        window.location = "/dangnhap/";
+    } else if(data.status === "user_exists"){
+        msg.innerText = "Tên đăng nhập đã tồn tại";
+    } else {
+        msg.innerText = "Đăng ký thất bại";
+    }
+}
+</script>
+
+</body>
+</html>

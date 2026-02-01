@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Đặt dịch vụ</title>
+</head>
+
+<body>
+
+<h2>Đặt dịch vụ</h2>
+
+<p>Thời gian bắt đầu:</p>
+<input type="datetime-local" id="start"><br><br>
+
+<p>Thời gian kết thúc:</p>
+<input type="datetime-local" id="end"><br><br>
+
+<p>Địa chỉ:</p>
+<input id="dia_chi" style="width:300px;"><br><br>
+
+<p>Mô tả trẻ:</p>
+<textarea id="tre_mo_ta"></textarea><br><br>
+
+<p>Yêu cầu thêm:</p>
+<textarea id="yeu_cau"></textarea><br><br>
+
+<button onclick="tinhGia()">Tính giá</button>
+
+<h3 id="gia">Giá tạm tính: 0 VND</h3>
+
+<button onclick="gui()">Gửi yêu cầu</button>
+
+<script>
+
+const urlParams = new URLSearchParams(window.location.search);
+const service_id = urlParams.get("service");
+
+let giaTam = 0;
+
+
+// ===== TÍNH GIÁ =====
+async function tinhGia(){
+
+    const r = await fetch("/api/tinhgia/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({
+            service_id: service_id,
+            start: document.getElementById("start").value,
+            end: document.getElementById("end").value
+        })
+    });
+
+    const d = await r.json();
+
+    if(d.status==="ok"){
+        giaTam = d.gia;
+        document.getElementById("gia").innerText =
+            "Giá tạm tính: "+d.gia+" VND";
+    }else{
+        alert("Không tính được giá");
+    }
+}
+
+
+// ===== GỬI BOOKING =====
+async function gui(){
+
+    if(giaTam==0){
+        alert("Hãy tính giá trước!");
+        return;
+    }
+
+    const r = await fetch("/api/booking/create/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body:JSON.stringify({
+            service_id: service_id,
+            start: document.getElementById("start").value,
+            end: document.getElementById("end").value,
+
+            dia_chi: document.getElementById("dia_chi").value,
+            tre_mo_ta: document.getElementById("tre_mo_ta").value,
+            yeu_cau: document.getElementById("yeu_cau").value,
+
+            gia_tam_tinh: giaTam   // 🔥 SỬA Ở ĐÂY
+        })
+    });
+
+    const d = await r.json();
+
+    if(d.status==="ok"){
+        alert("Gửi yêu cầu thành công!");
+        window.location="/dashboard/";
+    }else{
+        alert("Lỗi gửi booking");
+        console.log(d); // debug
+    }
+}
+
+
+// ===== LẤY CSRF TOKEN =====
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+</script>
+
+</body>
+</html>

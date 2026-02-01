@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Dashboard</title>
+</head>
+
+<body>
+
+<h2 id="hello">Xin chào</h2>
+
+<!-- ===== THANH TRÊN ===== -->
+<div style="border-bottom:1px solid #ccc;padding:10px;">
+    <button onclick="openChat()">Chatbot</button> |
+    <a href="/carepartner/">Đăng ký Care Partner</a> |
+    <button onclick="logout()">Logout</button>
+</div>
+
+<!-- ===== MODE ===== -->
+<div style="margin:10px 0;">
+    <b>Mode:</b> <span id="currentMode"></span><br>
+    <button onclick="switchMode('parent')">Phụ huynh</button>
+    <button onclick="switchMode('carepartner')">CarePartner</button>
+</div>
+
+<hr>
+
+<!-- ================= TRANG CHỦ ================= -->
+<div id="homeSection">
+
+<h3>Dịch vụ</h3>
+<div id="services"></div>
+
+<hr>
+
+<h3>Booking của tôi</h3>
+<div id="mybookings">Đang tải...</div>
+
+</div>
+
+<!-- ================= HOẠT ĐỘNG ================= -->
+<div id="activitySection" style="display:none;">
+<h3>Lịch sử hoạt động</h3>
+<div id="history"></div>
+</div>
+
+<!-- ================= TÀI KHOẢN ================= -->
+<div id="accountSection" style="display:none;">
+<h3>Tài khoản</h3>
+<p id="accInfo"></p>
+</div>
+
+<!-- ================= CAREPARTNER ================= -->
+<div id="carepartnerSection" style="display:none;">
+<h3>Đơn chờ nhận</h3>
+<div id="joblist"></div>
+</div>
+
+<hr>
+
+<!-- ===== MENU DƯỚI ===== -->
+<div style="
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#f0f0f0;
+border-top:1px solid #ccc;
+padding:12px;
+text-align:center;
+">
+
+<button onclick="showHome()">Trang chủ</button> |
+<button onclick="showActivities()">Hoạt động</button> |
+<button onclick="showAccount()">Tài khoản</button>
+
+</div>
+
+<script>
+
+// ===== USER =====
+async function loadUser(){
+    const r=await fetch("/api/me/");
+    const d=await r.json();
+
+    if(!d.login){
+        location="/dangnhap/";
+        return;
+    }
+
+    hello.innerText="Xin chào "+d.username;
+    accInfo.innerText="Tên đăng nhập: "+d.username;
+}
+
+// ===== MODE =====
+async function loadMode(){
+    const r=await fetch("/api/mode/");
+    const d=await r.json();
+
+    currentMode.innerText=d.mode;
+
+    if(d.mode==="carepartner"){
+        carepartnerSection.style.display="block";
+        loadOpenJobs();
+    }else{
+        carepartnerSection.style.display="none";
+        loadServices();
+        loadMyBookings();
+    }
+}
+
+async function switchMode(m){
+    await fetch("/api/mode/switch/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({mode:m})
+    });
+    location.reload();
+}
+
+// ===== SERVICES =====
+async function loadServices(){
+    const r=await fetch("/api/services/");
+    const d=await r.json();
+
+    let h="";
+    d.data.forEach(s=>{
+        h+=`
+        <div>
+        <b>${s.ten}</b><br>
+        Giá: ${s.gia_moi_gio}/giờ<br>
+        <a href="/booking/create/?service=${s.id}">
+        <button>Đặt dịch vụ</button></a>
+        </div><hr>`;
+    });
+
+    services.innerHTML=h;
+}
+
+// ===== MY BOOKINGS (PHỤ HUYNH) =====
+async function loadMyBookings(){
+    const r=await fetch("/api/my-bookings/");
+    const d=await r.json();
+
+    let h="";
+
+    d.data.forEach(b=>{
+
+        let confirmBtn="";
+
+        if(b.status==="applied"){
+            confirmBtn=`
+            <button onclick="parentConfirm(${b.id})">
+            XÁC NHẬN CAREPARTNER
+            </button>`;
+        }
+
+        h+=`
+        <div>
+        Dịch vụ: ${b.service}<br>
+        Thời gian: ${b.time}<br>
+        Giá: ${b.gia} VND<br>
+        Trạng thái: ${b.status}<br>
+        CarePartner: ${b.carepartner||"Chưa có"}<br>
+        ${confirmBtn}
+        </div><hr>`;
+    });
+
+    mybookings.innerHTML=h || "Chưa có booking";
+}
+
+// ===== PHỤ HUYNH XÁC NHẬN =====
+async function parentConfirm(id){
+    await fetch("/api/parent-confirm/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({booking_id:id})
+    });
+
+    alert("Đã xác nhận CarePartner!");
+    loadMyBookings();
+}
+
+// ===== CAREPARTNER JOBS =====
+async function loadOpenJobs(){
+    const r=await fetch("/api/jobs/open/");
+    const d=await r.json();
+
+    let h="";
+    d.data.forEach(j=>{
+        h+=`
+        <div>
+        Dịch vụ: ${j.service}<br>
+        Phụ huynh: ${j.parent}<br>
+        Thời gian: ${j.thoi_gian}<br>
+        Giá: ${j.gia} VND<br>
+        <button onclick="nhan(${j.id})">Nhận đơn</button>
+        </div><hr>`;
+    });
+
+    joblist.innerHTML=h || "Không có đơn";
+}
+
+async function nhan(id){
+    await fetch("/api/booking/nhan/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({booking_id:id})
+    });
+
+    alert("Đã apply đơn. Chờ phụ huynh xác nhận!");
+    loadOpenJobs();
+}
+
+// ===== TAB CONTROL =====
+function hideAll(){
+    homeSection.style.display="none";
+    activitySection.style.display="none";
+    accountSection.style.display="none";
+}
+
+function showHome(){
+    hideAll();
+    homeSection.style.display="block";
+}
+
+function showActivities(){
+    hideAll();
+    activitySection.style.display="block";
+}
+
+function showAccount(){
+    hideAll();
+    accountSection.style.display="block";
+}
+
+// ===== CHAT =====
+function openChat(){
+    window.location="/chat/"; // chuyển sang trang chat
+}
+
+// ===== LOGOUT =====
+async function logout(){
+    await fetch("/api/logout/");
+    location="/";
+}
+
+// INIT
+loadUser();
+loadMode();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập - EduCare Link</title>
+</head>
+
+<body>
+
+<h2>Đăng nhập</h2>
+
+<label>Tên đăng nhập</label><br>
+<input id="username" placeholder="Username"><br><br>
+
+<label>Mật khẩu</label><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button onclick="loginUser()">Đăng nhập</button>
+
+<p id="msg" style="color:red;"></p>
+
+<hr>
+
+<p>
+    Chưa có tài khoản?
+    <a href="/dangky/">Đăng ký</a>
+</p>
+
+<hr>
+
+<!-- ========================= -->
+<!-- CAREPARTNER JOBS -->
+<!-- ========================= -->
+
+<h3 id="currentMode"></h3>
+
+<div id="carepartnerSection" style="display:none;">
+    <h3>📦 Đơn chờ nhận</h3>
+    <div id="joblist">Đang tải...</div>
+</div>
+
+<script>
+
+//////////////////////////////
+// LOGIN
+//////////////////////////////
+async function loginUser(){
+    msg.innerText = "";
+
+    const res = await fetch("/api/dangnhap/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: username.value,
+            password: password.value
+        })
+    });
+
+    const data = await res.json();
+
+    if(data.status === "ok"){
+        window.location = "/dashboard/";
+    } else {
+        msg.innerText = "Sai tài khoản hoặc mật khẩu";
+    }
+}
+
+//////////////////////////////
+// LOAD JOBS
+//////////////////////////////
+async function loadOpenJobs(){
+    const res = await fetch("/api/jobs/open/");
+    const data = await res.json();
+
+    if(!data.data || data.data.length === 0){
+        joblist.innerHTML = "Không có đơn";
+        return;
+    }
+
+    let html = "";
+
+    data.data.forEach(j=>{
+        html += `
+        <div style="border:1px solid #ccc;margin:5px;padding:5px;">
+            <b>Địa chỉ:</b> ${j.dia_chi}<br>
+            <b>Thời gian:</b> ${j.thoi_gian}<br>
+            ${j.mo_ta}<br>
+            <button onclick="nhan(${j.id})">Nhận đơn</button>
+        </div>
+        `;
+    });
+
+    joblist.innerHTML = html;
+}
+
+//////////////////////////////
+// NHẬN ĐƠN
+//////////////////////////////
+async function nhan(id){
+    const res = await fetch("/api/booking/nhan/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({booking_id:id})
+    });
+
+    const data = await res.json();
+
+    if(data.status === "ok"){
+        alert("Đã nhận đơn!");
+        loadOpenJobs();
+    }else{
+        alert("Không nhận được đơn");
+    }
+}
+
+//////////////////////////////
+// LOAD MODE
+//////////////////////////////
+async function loadMode(){
+    const res = await fetch("/api/mode/");
+    const data = await res.json();
+
+    if(data.login){
+
+        currentMode.innerText =
+            data.mode === "parent"
+            ? "Chế độ: Phụ huynh"
+            : "Chế độ: Care Partner";
+
+        if(data.mode === "carepartner"){
+            carepartnerSection.style.display="block";
+            loadOpenJobs();
+        }else{
+            carepartnerSection.style.display="none";
+        }
+    }
+}
+
+// Tự động check mode khi mở trang
+loadMode();
+
+</script>
+
+</body>
+</html>

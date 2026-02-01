@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>EduCare Link</title>
+</head>
+<body>
+
+<h1>EduCare Link</h1>
+
+<p>Nền tảng kết nối phụ huynh và Care Partner</p>
+
+<hr>
+
+<h3>Bắt đầu</h3>
+
+<ul>
+    <li><a href="/dangky/">Đăng ký tài khoản</a></li>
+    <li><a href="/dangnhap/">Đăng nhập</a></li>
+</ul>
+
+<hr>
+
+<button onclick="check()">Tôi đã đăng nhập chưa?</button>
+
+<p id="status"></p>
+
+<script>
+async function check(){
+    const res = await fetch("/api/me/");
+    const data = await res.json();
+
+    if(data.login){
+        status.innerText = "Đã đăng nhập: " + data.username;
+        window.location = "/dashboard/";
+    }else{
+        status.innerText = "Chưa đăng nhập";
+    }
+}
+</script>
+
+</body>
+</html>

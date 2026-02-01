@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký Care Partner</title>
+</head>
+<body>
+
+<h2>Đăng ký Care Partner</h2>
+
+<div id="status" style="color:red;"></div>
+
+<form id="cpForm" enctype="multipart/form-data">
+    <label>Chuyên ngành</label><br>
+    <input type="text" name="chuyen_nganh" required><br><br>
+
+    <label>Trường</label><br>
+    <input type="text" name="truong" required><br><br>
+
+    <label>Kỹ năng</label><br>
+    <textarea name="ky_nang" required></textarea><br><br>
+
+    <label>Ảnh CCCD</label><br>
+    <input type="file" name="anh_cccd" required><br><br>
+
+    <label>Bằng cấp</label><br>
+    <input type="file" name="bang_cap" required><br><br>
+
+    <button type="submit">Gửi hồ sơ</button>
+</form>
+
+<hr>
+
+<a href="/dashboard/">← Quay lại Dashboard</a>
+
+<script>
+/* =========================
+   CHECK LOGIN
+========================= */
+async function checkLogin(){
+    const res = await fetch("/api/me/");
+    const data = await res.json();
+
+    if(!data.login){
+        window.location = "/dangnhap/";
+    }
+}
+checkLogin();
+
+/* =========================
+   SUBMIT FORM
+========================= */
+document.getElementById("cpForm").onsubmit = async function(e){
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    const res = await fetch("/api/carepartner/register/",{
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    if(data.status === "ok"){
+        alert("Đã gửi hồ sơ. Vui lòng chờ admin duyệt.");
+        location.reload();
+    }
+    else if(data.status === "already_registered"){
+        status.innerText = "Bạn đã đăng ký Care Partner rồi.";
+    }
+    else if(data.status === "login_required"){
+        window.location="/dangnhap/";
+    }
+    else{
+        status.innerText = "Có lỗi xảy ra.";
+    }
+}
+</script>
+
+</body>
+</html>

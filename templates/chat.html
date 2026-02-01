@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chatbot tư vấn</title>
+</head>
+
+<body>
+
+<h2>Chatbot tư vấn</h2>
+
+<div id="chatbox" style="
+border:1px solid #000;
+height:300px;
+overflow:auto;
+padding:10px;
+margin-bottom:10px;
+"></div>
+
+<input id="msg" placeholder="Nhập tin nhắn..." style="width:70%;">
+<button onclick="sendMsg()">Gửi</button>
+
+<script>
+
+async function sendMsg(){
+    let input=document.getElementById("msg");
+    let text=input.value.trim();
+
+    if(!text) return;
+
+    let box=document.getElementById("chatbox");
+
+    box.innerHTML += "<b>Bạn:</b> "+text+"<br>";
+    input.value="";
+
+    try{
+        let res=await fetch("/api/chat/",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                message:text
+            })
+        });
+
+        let data=await res.json();
+
+        box.innerHTML += "<b>Bot:</b> "+(data.reply || "Không có phản hồi")+"<br>";
+
+    }catch(err){
+        box.innerHTML += "<b>Bot:</b> Lỗi kết nối server<br>";
+    }
+
+    box.scrollTop=box.scrollHeight;
+}
+
+document.getElementById("msg").addEventListener("keypress",function(e){
+    if(e.key==="Enter"){
+        sendMsg();
+    }
+});
+
+</script>
+
+</body>
+</html>
