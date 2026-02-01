@@ -1,82 +1,355 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Đăng ký Care Partner</title>
-</head>
-<body>
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký Care Partner - EduCare Link</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 15px -3px rgba(16, 185, 129, 0.15),
+                        0 2px 8px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            outline: none;
+        }
+        
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.75rem;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-label:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .file-upload-label.has-file {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -8px rgba(16, 185, 129, 0.5);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-checkmark {
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        
+        .alert {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full gradient-bg">
+  <div class="h-full w-full overflow-y-auto">
+   <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8"><!-- Back Button --> <a href="/dashboard/" class="inline-flex items-center gap-2 text-green-800 hover:text-green-900 font-semibold mb-6 transition-colors">
+     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+     </svg> Quay lại Dashboard </a> <!-- Header -->
+    <div class="text-center mb-8 fade-in">
+     <div class="w-20 h-20 bg-white rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+      <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+     </div>
+     <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Đăng ký Care Partner</h1>
+     <p class="text-gray-700 text-lg">Tham gia cộng đồng chăm sóc trẻ chuyên nghiệp</p>
+    </div><!-- Status Messages -->
+    <div id="statusContainer"></div><!-- Form Card -->
+    <div class="bg-white rounded-3xl card-shadow p-6 sm:p-8 fade-in"><!-- Benefits -->
+     <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 mb-8 border-2 border-green-200">
+      <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+       <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg> Lợi ích khi trở thành Care Partner</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+       <div class="flex items-start gap-2">
+        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg><span class="text-sm text-gray-700">Thu nhập hấp dẫn</span>
+       </div>
+       <div class="flex items-start gap-2">
+        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg><span class="text-sm text-gray-700">Lịch linh hoạt</span>
+       </div>
+       <div class="flex items-start gap-2">
+        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg><span class="text-sm text-gray-700">Phát triển kỹ năng</span>
+       </div>
+      </div>
+     </div><!-- Form -->
+     <form id="cpForm" enctype="multipart/form-data" class="space-y-6"><!-- Chuyên ngành -->
+      <div><label for="chuyen_nganh" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg> Chuyên ngành <span class="text-red-500">*</span> </label> <input type="text" id="chuyen_nganh" name="chuyen_nganh" required placeholder="VD: Giáo dục mầm non, Tâm lý học..." class="form-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+      </div><!-- Trường -->
+      <div><label for="truong" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg> Trường <span class="text-red-500">*</span> </label> <input type="text" id="truong" name="truong" required placeholder="VD: Đại học Sư phạm TP.HCM..." class="form-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl">
+      </div><!-- Kỹ năng -->
+      <div><label for="ky_nang" class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg> Kỹ năng <span class="text-red-500">*</span> </label> <textarea id="ky_nang" name="ky_nang" required rows="4" placeholder="Mô tả các kỹ năng của bạn: chăm sóc trẻ, dạy học, vui chơi, xử lý tình huống..." class="form-input w-full px-4 py-3 border-2 border-gray-200 rounded-xl resize-none"></textarea>
+      </div><!-- Ảnh CCCD -->
+      <div><label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+        </svg> Ảnh CCCD <span class="text-red-500">*</span> </label>
+       <div class="file-upload-wrapper"><input type="file" id="anh_cccd" name="anh_cccd" required accept="image/*" onchange="handleFileSelect(this, 'cccdLabel')"> <label for="anh_cccd" id="cccdLabel" class="file-upload-label">
+         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+         </svg>
+         <div class="text-center"><span class="file-name text-sm text-gray-600 font-medium">Chọn ảnh CCCD</span>
+          <p class="text-xs text-gray-500 mt-1">PNG, JPG tối đa 10MB</p>
+         </div></label>
+       </div>
+      </div><!-- Bằng cấp -->
+      <div><label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg> Bằng cấp <span class="text-red-500">*</span> </label>
+       <div class="file-upload-wrapper"><input type="file" id="bang_cap" name="bang_cap" required accept="image/*,.pdf" onchange="handleFileSelect(this, 'bangcapLabel')"> <label for="bang_cap" id="bangcapLabel" class="file-upload-label">
+         <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+         </svg>
+         <div class="text-center"><span class="file-name text-sm text-gray-600 font-medium">Chọn bằng cấp</span>
+          <p class="text-xs text-gray-500 mt-1">PNG, JPG, PDF tối đa 10MB</p>
+         </div></label>
+       </div>
+      </div><!-- Submit Button --> <button type="submit" id="submitBtn" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg><span id="submitText">Gửi hồ sơ đăng ký</span> </button>
+     </form><!-- Note -->
+     <div class="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+      <div class="flex gap-3">
+       <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg>
+       <div>
+        <p class="text-sm font-semibold text-blue-900 mb-1">Lưu ý quan trọng</p>
+        <p class="text-sm text-blue-800">Hồ sơ của bạn sẽ được admin xem xét và phê duyệt trong vòng 24-48 giờ. Chúng tôi sẽ thông báo kết quả qua email.</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Success Modal -->
+  <div id="successModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+   <div class="flex items-center justify-center min-h-screen px-4" style="background: rgba(0, 0, 0, 0.5);">
+    <div class="bg-white rounded-3xl card-shadow max-w-md w-full p-8 text-center" style="animation: slideUp 0.3s ease-out;">
+     <div class="success-checkmark w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+      <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+      </svg>
+     </div>
+     <h3 class="text-2xl font-bold text-gray-900 mb-3">Gửi hồ sơ thành công!</h3>
+     <p class="text-gray-600 mb-6">Cảm ơn bạn đã đăng ký. Vui lòng chờ admin xem xét và phê duyệt hồ sơ.</p><button onclick="closeSuccessModal()" class="btn-primary w-full py-3 px-6 rounded-xl text-white font-semibold"> Đã hiểu </button>
+    </div>
+   </div>
+  </div>
+  <script>
+        /* =========================
+           CHECK LOGIN (Original logic)
+        ========================= */
+        async function checkLogin(){
+            const res = await fetch("/api/me/");
+            const data = await res.json();
 
-<h2>Đăng ký Care Partner</h2>
+            if(!data.login){
+                window.location = "/dangnhap/";
+            }
+        }
+        checkLogin();
 
-<div id="status" style="color:red;"></div>
+        /* =========================
+           FILE UPLOAD HANDLER
+        ========================= */
+        function handleFileSelect(input, labelId) {
+            const label = document.getElementById(labelId);
+            const fileName = input.files[0]?.name || '';
+            
+            if (fileName) {
+                label.classList.add('has-file');
+                const fileNameSpan = label.querySelector('.file-name');
+                fileNameSpan.textContent = fileName;
+                fileNameSpan.classList.add('text-green-700', 'font-semibold');
+            }
+        }
 
-<form id="cpForm" enctype="multipart/form-data">
-    <label>Chuyên ngành</label><br>
-    <input type="text" name="chuyen_nganh" required><br><br>
+        /* =========================
+           SHOW ALERT
+        ========================= */
+        function showAlert(message, type = 'error') {
+            const statusContainer = document.getElementById('statusContainer');
+            
+            const colors = {
+                error: 'bg-red-50 border-red-200 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                info: 'bg-blue-50 border-blue-200 text-blue-800'
+            };
+            
+            const icons = {
+                error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>',
+                info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+            };
+            
+            statusContainer.innerHTML = `
+                <div class="alert ${colors[type]} border-2 rounded-xl p-4 mb-6 flex items-start gap-3">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${icons[type]}
+                    </svg>
+                    <p class="text-sm font-medium">${message}</p>
+                </div>
+            `;
+            
+            // Scroll to alert
+            statusContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
 
-    <label>Trường</label><br>
-    <input type="text" name="truong" required><br><br>
+        /* =========================
+           SUCCESS MODAL
+        ========================= */
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.remove('hidden');
+        }
 
-    <label>Kỹ năng</label><br>
-    <textarea name="ky_nang" required></textarea><br><br>
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            location.reload();
+        }
 
-    <label>Ảnh CCCD</label><br>
-    <input type="file" name="anh_cccd" required><br><br>
+        /* =========================
+           SUBMIT FORM (Original logic with UI enhancements)
+        ========================= */
+        document.getElementById("cpForm").onsubmit = async function(e){
+            e.preventDefault();
 
-    <label>Bằng cấp</label><br>
-    <input type="file" name="bang_cap" required><br><br>
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const statusContainer = document.getElementById('statusContainer');
+            
+            // Clear previous messages
+            statusContainer.innerHTML = '';
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitText.innerHTML = `
+                <svg class="loading-spinner w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30 70"/>
+                </svg>
+                Đang gửi...
+            `;
 
-    <button type="submit">Gửi hồ sơ</button>
-</form>
+            const formData = new FormData(this);
 
-<hr>
+            try {
+                const res = await fetch("/api/carepartner/register/",{
+                    method: "POST",
+                    body: formData
+                });
 
-<a href="/dashboard/">← Quay lại Dashboard</a>
+                const data = await res.json();
 
-<script>
-/* =========================
-   CHECK LOGIN
-========================= */
-async function checkLogin(){
-    const res = await fetch("/api/me/");
-    const data = await res.json();
-
-    if(!data.login){
-        window.location = "/dangnhap/";
-    }
-}
-checkLogin();
-
-/* =========================
-   SUBMIT FORM
-========================= */
-document.getElementById("cpForm").onsubmit = async function(e){
-    e.preventDefault();
-
-    const formData = new FormData(this);
-
-    const res = await fetch("/api/carepartner/register/",{
-        method: "POST",
-        body: formData
-    });
-
-    const data = await res.json();
-
-    if(data.status === "ok"){
-        alert("Đã gửi hồ sơ. Vui lòng chờ admin duyệt.");
-        location.reload();
-    }
-    else if(data.status === "already_registered"){
-        status.innerText = "Bạn đã đăng ký Care Partner rồi.";
-    }
-    else if(data.status === "login_required"){
-        window.location="/dangnhap/";
-    }
-    else{
-        status.innerText = "Có lỗi xảy ra.";
-    }
-}
-</script>
-
-</body>
+                if(data.status === "ok"){
+                    showSuccessModal();
+                }
+                else if(data.status === "already_registered"){
+                    showAlert("Bạn đã đăng ký Care Partner rồi.", "warning");
+                }
+                else if(data.status === "login_required"){
+                    window.location="/dangnhap/";
+                }
+                else{
+                    showAlert("Có lỗi xảy ra. Vui lòng thử lại sau.", "error");
+                }
+            } catch (error) {
+                showAlert("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.", "error");
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitText.innerHTML = `
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Gửi hồ sơ đăng ký
+                `;
+            }
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c720c3c52365e0a',t:'MTc2OTk1NTE4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

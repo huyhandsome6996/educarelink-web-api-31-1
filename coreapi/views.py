@@ -613,3 +613,22 @@ def api_parent_confirm(request):
 @login_required
 def chat_page(request):
     return render(request, "chat.html")
+
+
+@login_required
+def api_booking_detail(request, booking_id):
+    b = Booking.objects.get(id=booking_id)
+
+    return JsonResponse({
+        "id": b.id,
+        "service": b.service.name,
+        "start": b.start_time,
+        "end": b.end_time,
+        "address": b.address,
+        "child_desc": b.child_desc,
+        "extra_req": b.extra_req,
+        "price": b.price,
+        "status": b.status,
+        "parent": b.parent.username,
+        "carepartner": b.carepartner.username if b.carepartner else None,
+    })

@@ -1,0 +1,25 @@
+<h2>Chi tiết đơn hàng</h2>
+
+<p><b>Dịch vụ:</b> <span id="service"></span></p>
+<p><b>Thời gian:</b> <span id="time"></span></p>
+<p><b>Địa chỉ:</b> <span id="address"></span></p>
+<p><b>Mô tả trẻ:</b> <span id="child"></span></p>
+<p><b>Yêu cầu thêm:</b> <span id="extra"></span></p>
+<p><b>Giá:</b> <span id="price"></span> VND</p>
+
+<button id="acceptBtn">Nhận đơn</button>
+
+<script>
+async function load(){
+    const res = await fetch("/api/booking/{{id}}/");
+    const b = await res.json();
+
+    service.innerText = b.service;
+    time.innerText = b.start + " → " + b.end;
+    address.innerText = b.address;
+    child.innerText = b.child_desc;
+    extra.innerText = b.extra_req;
+    price.innerText = b.price;
+}
+load();
+</script>

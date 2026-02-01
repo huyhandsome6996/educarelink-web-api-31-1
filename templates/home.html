@@ -1,43 +1,225 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>EduCare Link</title>
-</head>
-<body>
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduCare Link</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecfeff 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.15),
+                        0 4px 20px -5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -8px rgba(14, 165, 233, 0.5);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        
+        .btn-check {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #86efac;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-check:hover {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-color: #4ade80;
+            transform: translateY(-2px);
+        }
+        
+        .logo-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .status-box {
+            transition: all 0.4s ease;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full gradient-bg">
+  <div class="min-h-full w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-auto">
+   <div class="w-full max-w-md fade-in"><!-- Main Card -->
+    <div class="bg-white rounded-3xl card-shadow p-8 sm:p-10"><!-- Logo & Header -->
+     <div class="text-center mb-8">
+      <div class="logo-icon inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-2xl mb-5 shadow-lg">
+       <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+       </svg>
+      </div>
+      <h1 id="mainTitle" class="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">EduCare Link</h1>
+      <p id="tagline" class="text-gray-500 text-base sm:text-lg leading-relaxed">Nền tảng kết nối phụ huynh và Care Partner</p>
+     </div><!-- Divider -->
+     <div class="flex items-center gap-4 mb-8">
+      <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div><span class="text-sm text-gray-400 font-medium">Bắt đầu ngay</span>
+      <div class="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+     </div><!-- Action Buttons -->
+     <div class="space-y-4 mb-8"><a href="/dangky/" class="btn-primary block w-full py-4 px-6 rounded-xl text-white font-semibold text-lg text-center no-underline"> <span class="flex items-center justify-center gap-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg><span id="registerBtnText">Đăng ký tài khoản</span> </span> </a> <a href="/dangnhap/" class="btn-secondary block w-full py-4 px-6 rounded-xl text-gray-700 font-semibold text-lg text-center no-underline"> <span class="flex items-center justify-center gap-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg><span id="loginBtnText">Đăng nhập</span> </span> </a>
+     </div><!-- Check Status Section -->
+     <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+      <p class="text-sm text-gray-500 text-center mb-4">Đã có tài khoản? Kiểm tra trạng thái</p><button onclick="check()" id="checkBtn" class="btn-check w-full py-3.5 px-6 rounded-xl text-green-700 font-semibold text-base flex items-center justify-center gap-2">
+       <svg id="checkIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg><span id="checkBtnText">Kiểm tra trạng thái đăng nhập</span> </button> <!-- Status Display -->
+      <div id="statusContainer" class="mt-4 hidden">
+       <div id="status" class="status-box text-center py-3 px-4 rounded-xl text-sm font-medium"></div>
+      </div>
+     </div>
+    </div><!-- Footer -->
+    <div class="text-center mt-6">
+     <p class="text-gray-400 text-sm">© 2024 EduCare Link. Kết nối yêu thương.</p>
+    </div>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            main_title: "EduCare Link",
+            tagline: "Nền tảng kết nối phụ huynh và Care Partner",
+            register_button_text: "Đăng ký tài khoản",
+            login_button_text: "Đăng nhập",
+            check_button_text: "Kiểm tra trạng thái đăng nhập",
+            primary_color: "#0ea5e9",
+            background_color: "#f0f9ff",
+            text_color: "#1e293b",
+            surface_color: "#ffffff",
+            accent_color: "#22c55e"
+        };
 
-<h1>EduCare Link</h1>
+        async function onConfigChange(config) {
+            document.getElementById('mainTitle').textContent = config.main_title || defaultConfig.main_title;
+            document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
+            document.getElementById('registerBtnText').textContent = config.register_button_text || defaultConfig.register_button_text;
+            document.getElementById('loginBtnText').textContent = config.login_button_text || defaultConfig.login_button_text;
+            document.getElementById('checkBtnText').textContent = config.check_button_text || defaultConfig.check_button_text;
+        }
 
-<p>Nền tảng kết nối phụ huynh và Care Partner</p>
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
 
-<hr>
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["main_title", config.main_title || defaultConfig.main_title],
+                ["tagline", config.tagline || defaultConfig.tagline],
+                ["register_button_text", config.register_button_text || defaultConfig.register_button_text],
+                ["login_button_text", config.login_button_text || defaultConfig.login_button_text],
+                ["check_button_text", config.check_button_text || defaultConfig.check_button_text]
+            ]);
+        }
 
-<h3>Bắt đầu</h3>
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
 
-<ul>
-    <li><a href="/dangky/">Đăng ký tài khoản</a></li>
-    <li><a href="/dangnhap/">Đăng nhập</a></li>
-</ul>
+        // Original JavaScript logic - unchanged
+        async function check() {
+            const checkBtn = document.getElementById('checkBtn');
+            const checkIcon = document.getElementById('checkIcon');
+            const statusContainer = document.getElementById('statusContainer');
+            const status = document.getElementById('status');
+            
+            // Show loading state
+            checkBtn.disabled = true;
+            checkIcon.innerHTML = '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30 70" class="loading-spinner origin-center"/>';
+            checkIcon.classList.add('loading-spinner');
+            
+            try {
+                const res = await fetch("/api/me/");
+                const data = await res.json();
 
-<hr>
-
-<button onclick="check()">Tôi đã đăng nhập chưa?</button>
-
-<p id="status"></p>
-
-<script>
-async function check(){
-    const res = await fetch("/api/me/");
-    const data = await res.json();
-
-    if(data.login){
-        status.innerText = "Đã đăng nhập: " + data.username;
-        window.location = "/dashboard/";
-    }else{
-        status.innerText = "Chưa đăng nhập";
-    }
-}
-</script>
-
-</body>
+                statusContainer.classList.remove('hidden');
+                
+                if (data.login) {
+                    status.innerText = "✓ Đã đăng nhập: " + data.username;
+                    status.className = "status-box text-center py-3 px-4 rounded-xl text-sm font-medium bg-green-100 text-green-700 border border-green-200";
+                    
+                    // Redirect after showing message
+                    setTimeout(() => {
+                        window.location = "/dashboard/";
+                    }, 1500);
+                } else {
+                    status.innerText = "Chưa đăng nhập. Vui lòng đăng ký hoặc đăng nhập.";
+                    status.className = "status-box text-center py-3 px-4 rounded-xl text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200";
+                }
+            } catch (error) {
+                statusContainer.classList.remove('hidden');
+                status.innerText = "Không thể kết nối. Vui lòng thử lại.";
+                status.className = "status-box text-center py-3 px-4 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200";
+            } finally {
+                // Reset button state
+                checkBtn.disabled = false;
+                checkIcon.classList.remove('loading-spinner');
+                checkIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+            }
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c71ea2eb7df02d2',t:'MTc2OTk1Mzc5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

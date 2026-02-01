@@ -1,0 +1,22 @@
+<h2>Danh sách đơn</h2>
+
+<div id="jobs"></div>
+
+<script>
+async function loadJobs(){
+    let res = await fetch("/api/jobs/open/");
+    let data = await res.json();
+
+    let html = "";
+    data.forEach(j=>{
+        html += `<div>
+            <p>${j.dia_chi}</p>
+            <p>${j.tre_mo_ta}</p>
+        </div><hr>`;
+    });
+
+    document.getElementById("jobs").innerHTML = html;
+}
+
+loadJobs();
+</script>

@@ -1,255 +1,803 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Dashboard</title>
-</head>
-
-<body>
-
-<h2 id="hello">Xin chào</h2>
-
-<!-- ===== THANH TRÊN ===== -->
-<div style="border-bottom:1px solid #ccc;padding:10px;">
-    <button onclick="openChat()">Chatbot</button> |
-    <a href="/carepartner/">Đăng ký Care Partner</a> |
-    <button onclick="logout()">Logout</button>
-</div>
-
-<!-- ===== MODE ===== -->
-<div style="margin:10px 0;">
-    <b>Mode:</b> <span id="currentMode"></span><br>
-    <button onclick="switchMode('parent')">Phụ huynh</button>
-    <button onclick="switchMode('carepartner')">CarePartner</button>
-</div>
-
-<hr>
-
-<!-- ================= TRANG CHỦ ================= -->
-<div id="homeSection">
-
-<h3>Dịch vụ</h3>
-<div id="services"></div>
-
-<hr>
-
-<h3>Booking của tôi</h3>
-<div id="mybookings">Đang tải...</div>
-
-</div>
-
-<!-- ================= HOẠT ĐỘNG ================= -->
-<div id="activitySection" style="display:none;">
-<h3>Lịch sử hoạt động</h3>
-<div id="history"></div>
-</div>
-
-<!-- ================= TÀI KHOẢN ================= -->
-<div id="accountSection" style="display:none;">
-<h3>Tài khoản</h3>
-<p id="accInfo"></p>
-</div>
-
-<!-- ================= CAREPARTNER ================= -->
-<div id="carepartnerSection" style="display:none;">
-<h3>Đơn chờ nhận</h3>
-<div id="joblist"></div>
-</div>
-
-<hr>
-
-<!-- ===== MENU DƯỚI ===== -->
-<div style="
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#f0f0f0;
-border-top:1px solid #ccc;
-padding:12px;
-text-align:center;
-">
-
-<button onclick="showHome()">Trang chủ</button> |
-<button onclick="showActivities()">Hoạt động</button> |
-<button onclick="showAccount()">Tài khoản</button>
-
-</div>
-
-<script>
-
-// ===== USER =====
-async function loadUser(){
-    const r=await fetch("/api/me/");
-    const d=await r.json();
-
-    if(!d.login){
-        location="/dangnhap/";
-        return;
-    }
-
-    hello.innerText="Xin chào "+d.username;
-    accInfo.innerText="Tên đăng nhập: "+d.username;
-}
-
-// ===== MODE =====
-async function loadMode(){
-    const r=await fetch("/api/mode/");
-    const d=await r.json();
-
-    currentMode.innerText=d.mode;
-
-    if(d.mode==="carepartner"){
-        carepartnerSection.style.display="block";
-        loadOpenJobs();
-    }else{
-        carepartnerSection.style.display="none";
-        loadServices();
-        loadMyBookings();
-    }
-}
-
-async function switchMode(m){
-    await fetch("/api/mode/switch/",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({mode:m})
-    });
-    location.reload();
-}
-
-// ===== SERVICES =====
-async function loadServices(){
-    const r=await fetch("/api/services/");
-    const d=await r.json();
-
-    let h="";
-    d.data.forEach(s=>{
-        h+=`
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - EduCare Link</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 15px -3px rgba(14, 165, 233, 0.1),
+                        0 2px 8px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -8px rgba(14, 165, 233, 0.25);
+        }
+        
+        .tab-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .tab-btn.active {
+            color: #0ea5e9;
+        }
+        
+        .tab-btn.active svg {
+            transform: scale(1.1);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+        
+        .badge-applied {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+        
+        .badge-confirmed {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+        
+        .badge-parent {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #3730a3;
+        }
+        
+        .badge-carepartner {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px -6px rgba(14, 165, 233, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px -6px rgba(16, 185, 129, 0.4);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            animation: fadeInBg 0.2s ease-out;
+        }
+        
+        @keyframes fadeInBg {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .register-cp-card {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
+            border: 3px solid #10b981;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-cp-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(0%, 0%) scale(1); opacity: 1; }
+        }
+        
+        .register-cp-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 16px 40px -10px rgba(16, 185, 129, 0.5);
+            border-color: #059669;
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full gradient-bg">
+  <div class="h-full w-full flex flex-col overflow-hidden"><!-- Top Bar -->
+   <div class="bg-white border-b border-gray-200 card-shadow sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+     <div class="flex items-center justify-between"><!-- Left: Hello + Mode Badge -->
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-full flex items-center justify-center shadow-md">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+       </div>
+       <div>
+        <h2 id="hello" class="text-sm sm:text-base font-bold text-gray-800">Xin chào</h2>
+        <div id="modeBadgeContainer" class="mt-1"></div>
+       </div>
+      </div><!-- Right: Actions -->
+      <div class="flex items-center gap-2"><button onclick="openChat()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Chatbot">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg></button> <button onclick="showModeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Chuyển chế độ">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg></button> <button onclick="showLogoutModal()" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Đăng xuất">
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg></button>
+      </div>
+     </div>
+    </div>
+   </div><!-- Main Content -->
+   <div class="flex-1 overflow-y-auto pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6"><!-- ================= TRANG CHỦ ================= -->
+     <div id="homeSection" class="fade-in"><!-- Services Section (Parent Mode) -->
+      <div id="servicesSection" style="display:none;">
+       <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold text-gray-800">🎯 Dịch vụ</h3>
+       </div>
+       <div id="services" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
+       <div class="flex items-center justify-between mb-4 mt-8">
+        <h3 class="text-xl font-bold text-gray-800">📋 Booking của tôi</h3>
+       </div>
+       <div id="mybookings" class="space-y-4">
+        <div class="text-center py-8">
+         <svg class="loading-spinner w-8 h-8 text-sky-500 mx-auto" fill="none" stroke="currentColor" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30 70" />
+         </svg>
+         <p class="text-gray-500 mt-3">Đang tải...</p>
+        </div>
+       </div>
+      </div><!-- Jobs Section (CarePartner Mode) -->
+      <div id="carepartnerSection" style="display:none;">
+       <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold text-gray-800">💼 Đơn chờ nhận</h3>
+       </div>
+       <div id="joblist" class="space-y-4">
+        <div class="text-center py-8">
+         <svg class="loading-spinner w-8 h-8 text-sky-500 mx-auto" fill="none" stroke="currentColor" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30 70" />
+         </svg>
+         <p class="text-gray-500 mt-3">Đang tải...</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- ================= HOẠT ĐỘNG ================= -->
+     <div id="activitySection" style="display:none;" class="fade-in">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Lịch sử hoạt động</h3>
+      <div id="history" class="bg-white rounded-2xl card-shadow p-8 text-center">
+       <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+       </svg>
+       <p class="text-gray-500">Lịch sử hoạt động đang được phát triển</p>
+      </div>
+     </div><!-- ================= TÀI KHOẢN ================= -->
+     <div id="accountSection" style="display:none;" class="fade-in">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">👤 Tài khoản</h3>
+      <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+       <div class="flex items-center gap-4 mb-6">
+        <div class="w-16 h-16 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+         </svg>
+        </div>
         <div>
-        <b>${s.ten}</b><br>
-        Giá: ${s.gia_moi_gio}/giờ<br>
-        <a href="/booking/create/?service=${s.id}">
-        <button>Đặt dịch vụ</button></a>
-        </div><hr>`;
-    });
+         <p id="accInfo" class="text-lg font-semibold text-gray-800"></p>
+         <p class="text-sm text-gray-500">Thành viên EduCare Link</p>
+        </div>
+       </div>
+      </div><!-- Register Care Partner Card (with animation) --> <a href="/carepartner/" class="block">
+       <div class="register-cp-card rounded-3xl p-8 relative">
+        <div class="relative z-10">
+         <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-3">
+           <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+           </div>
+           <div>
+            <h4 class="text-2xl font-bold text-green-900 flex items-center gap-2">Đăng ký Care Partner <span class="pulse-dot w-3 h-3 bg-green-600 rounded-full"></span></h4>
+            <p class="text-green-700 font-medium mt-1">Trở thành người chăm sóc chuyên nghiệp</p>
+           </div>
+          </div>
+          <svg class="w-8 h-8 text-green-700 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+          </svg>
+         </div>
+         <div class="space-y-3">
+          <div class="flex items-center gap-3 text-green-800">
+           <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg><span class="font-semibold">Thu nhập hấp dẫn từ việc chăm sóc trẻ</span>
+          </div>
+          <div class="flex items-center gap-3 text-green-800">
+           <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg><span class="font-semibold">Lịch làm việc linh hoạt theo nhu cầu</span>
+          </div>
+          <div class="flex items-center gap-3 text-green-800">
+           <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg><span class="font-semibold">Cơ hội phát triển kỹ năng chuyên môn</span>
+          </div>
+         </div>
+         <div class="mt-6 pt-6 border-t-2 border-green-600">
+          <p class="text-center text-green-900 font-bold text-lg">👉 Nhấn để bắt đầu đăng ký ngay!</p>
+         </div>
+        </div>
+       </div></a>
+     </div>
+    </div>
+   </div><!-- Bottom Navigation -->
+   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 card-shadow z-50">
+    <div class="max-w-7xl mx-auto px-4">
+     <div class="flex items-center justify-around py-2"><button onclick="showHome()" id="tabHome" class="tab-btn active flex flex-col items-center gap-1 px-4 py-2 rounded-lg">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+       </svg><span class="text-xs font-medium">Trang chủ</span> </button> <button onclick="showActivities()" id="tabActivity" class="tab-btn flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-500">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+       </svg><span class="text-xs font-medium">Hoạt động</span> </button> <button onclick="showAccount()" id="tabAccount" class="tab-btn flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-500">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+       </svg><span class="text-xs font-medium">Tài khoản</span> </button>
+     </div>
+    </div>
+   </div>
+  </div><!-- Mode Switch Modal -->
+  <div id="modeModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+   <div class="modal-overlay flex items-center justify-center min-h-screen px-4">
+    <div class="modal-content bg-white rounded-3xl card-shadow max-w-md w-full p-6">
+     <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+       <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+       </svg>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">Chuyển chế độ</h3>
+      <p class="text-gray-500">Chọn chế độ sử dụng</p>
+     </div>
+     <div class="space-y-3 mb-6"><button onclick="switchMode('parent')" class="w-full p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl hover:border-indigo-400 transition-all">
+       <div class="flex items-center gap-3">
+        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <div class="text-left flex-1">
+         <p class="font-bold text-gray-800">Phụ huynh</p>
+         <p class="text-sm text-gray-600">Đặt dịch vụ chăm sóc</p>
+        </div>
+       </div></button> <button onclick="switchMode('carepartner')" class="w-full p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl hover:border-green-400 transition-all">
+       <div class="flex items-center gap-3">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <div class="text-left flex-1">
+         <p class="font-bold text-gray-800">Care Partner</p>
+         <p class="text-sm text-gray-600">Nhận đơn chăm sóc</p>
+        </div>
+       </div></button>
+     </div><button onclick="closeModeModal()" class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-gray-700 transition-colors"> Hủy </button>
+    </div>
+   </div>
+  </div><!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+   <div class="modal-overlay flex items-center justify-center min-h-screen px-4">
+    <div class="modal-content bg-white rounded-3xl card-shadow max-w-sm w-full p-6">
+     <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-rose-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+       <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+       </svg>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">Đăng xuất</h3>
+      <p class="text-gray-500">Bạn có chắc muốn đăng xuất?</p>
+     </div>
+     <div class="space-y-3"><button onclick="confirmLogout()" class="w-full py-3 px-4 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 rounded-xl font-semibold text-white transition-all"> Đăng xuất </button> <button onclick="closeLogoutModal()" class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-gray-700 transition-colors"> Hủy </button>
+     </div>
+    </div>
+   </div>
+  </div><!-- Confirm CarePartner Modal -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+   <div class="modal-overlay flex items-center justify-center min-h-screen px-4">
+    <div class="modal-content bg-white rounded-3xl card-shadow max-w-sm w-full p-6">
+     <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+       <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">Xác nhận Care Partner</h3>
+      <p class="text-gray-500">Bạn có chắc muốn xác nhận Care Partner này?</p>
+     </div>
+     <div class="space-y-3"><button onclick="confirmParentConfirm()" class="w-full py-3 px-4 btn-success rounded-xl font-semibold text-white"> Xác nhận </button> <button onclick="closeConfirmModal()" class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-gray-700 transition-colors"> Hủy </button>
+     </div>
+    </div>
+   </div>
+  </div><!-- Accept Job Modal -->
+  <div id="acceptModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+   <div class="modal-overlay flex items-center justify-center min-h-screen px-4">
+    <div class="modal-content bg-white rounded-3xl card-shadow max-w-sm w-full p-6">
+     <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+       <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+       </svg>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">Nhận đơn</h3>
+      <p class="text-gray-500">Bạn có chắc muốn nhận đơn này?</p>
+     </div>
+     <div class="space-y-3"><button onclick="confirmNhan()" class="w-full py-3 px-4 btn-success rounded-xl font-semibold text-white"> Nhận đơn </button> <button onclick="closeAcceptModal()" class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold text-gray-700 transition-colors"> Hủy </button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {};
 
-    services.innerHTML=h;
-}
+        async function onConfigChange(config) {}
 
-// ===== MY BOOKINGS (PHỤ HUYNH) =====
-async function loadMyBookings(){
-    const r=await fetch("/api/my-bookings/");
-    const d=await r.json();
-
-    let h="";
-
-    d.data.forEach(b=>{
-
-        let confirmBtn="";
-
-        if(b.status==="applied"){
-            confirmBtn=`
-            <button onclick="parentConfirm(${b.id})">
-            XÁC NHẬN CAREPARTNER
-            </button>`;
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
         }
 
-        h+=`
-        <div>
-        Dịch vụ: ${b.service}<br>
-        Thời gian: ${b.time}<br>
-        Giá: ${b.gia} VND<br>
-        Trạng thái: ${b.status}<br>
-        CarePartner: ${b.carepartner||"Chưa có"}<br>
-        ${confirmBtn}
-        </div><hr>`;
-    });
+        function mapToEditPanelValues(config) {
+            return new Map();
+        }
 
-    mybookings.innerHTML=h || "Chưa có booking";
-}
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
 
-// ===== PHỤ HUYNH XÁC NHẬN =====
-async function parentConfirm(id){
-    await fetch("/api/parent-confirm/",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({booking_id:id})
-    });
+        // Global variables for modals
+        let pendingConfirmBookingId = null;
+        let pendingAcceptJobId = null;
 
-    alert("Đã xác nhận CarePartner!");
-    loadMyBookings();
-}
+        //////////////////////////////
+        // USER (Original logic)
+        //////////////////////////////
+        async function loadUser(){
+            const r=await fetch("/api/me/");
+            const d=await r.json();
 
-// ===== CAREPARTNER JOBS =====
-async function loadOpenJobs(){
-    const r=await fetch("/api/jobs/open/");
-    const d=await r.json();
+            if(!d.login){
+                location="/dangnhap/";
+                return;
+            }
 
-    let h="";
-    d.data.forEach(j=>{
-        h+=`
-        <div>
-        Dịch vụ: ${j.service}<br>
-        Phụ huynh: ${j.parent}<br>
-        Thời gian: ${j.thoi_gian}<br>
-        Giá: ${j.gia} VND<br>
-        <button onclick="nhan(${j.id})">Nhận đơn</button>
-        </div><hr>`;
-    });
+            hello.innerText="Xin chào "+d.username;
+            accInfo.innerText="Tên đăng nhập: "+d.username;
+        }
 
-    joblist.innerHTML=h || "Không có đơn";
-}
+        //////////////////////////////
+        // MODE (Original logic)
+        //////////////////////////////
+        async function loadMode(){
+            const r=await fetch("/api/mode/");
+            const d=await r.json();
 
-async function nhan(id){
-    await fetch("/api/booking/nhan/",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({booking_id:id})
-    });
+            const modeBadgeContainer = document.getElementById('modeBadgeContainer');
+            
+            if (d.mode === "carepartner") {
+                modeBadgeContainer.innerHTML = '<span class="badge badge-carepartner text-xs">Care Partner</span>';
+                carepartnerSection.style.display="block";
+                servicesSection.style.display="none";
+                loadOpenJobs();
+            } else {
+                modeBadgeContainer.innerHTML = '<span class="badge badge-parent text-xs">Phụ huynh</span>';
+                carepartnerSection.style.display="none";
+                servicesSection.style.display="block";
+                loadServices();
+                loadMyBookings();
+            }
+        }
 
-    alert("Đã apply đơn. Chờ phụ huynh xác nhận!");
-    loadOpenJobs();
-}
+        async function switchMode(m){
+            await fetch("/api/mode/switch/",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({mode:m})
+            });
+            location.reload();
+        }
 
-// ===== TAB CONTROL =====
-function hideAll(){
-    homeSection.style.display="none";
-    activitySection.style.display="none";
-    accountSection.style.display="none";
-}
+        //////////////////////////////
+        // SERVICES (Original logic)
+        //////////////////////////////
+        async function loadServices(){
+            const r=await fetch("/api/services/");
+            const d=await r.json();
 
-function showHome(){
-    hideAll();
-    homeSection.style.display="block";
-}
+            let h="";
+            d.data.forEach(s=>{
+                h+=`
+                <div class="service-card bg-white rounded-2xl card-shadow p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">${s.ten}</h4>
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <span class="text-2xl font-bold text-sky-600">${s.gia_moi_gio}</span>
+                        <span class="text-sm text-gray-500">/giờ</span>
+                    </div>
+                    <a href="/booking/create/?service=${s.id}">
+                        <button class="btn-primary w-full py-3 px-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Đặt dịch vụ
+                        </button>
+                    </a>
+                </div>
+                `;
+            });
 
-function showActivities(){
-    hideAll();
-    activitySection.style.display="block";
-}
+            services.innerHTML=h;
+        }
 
-function showAccount(){
-    hideAll();
-    accountSection.style.display="block";
-}
+        //////////////////////////////
+        // MY BOOKINGS (Original logic)
+        //////////////////////////////
+        async function loadMyBookings(){
+            const r=await fetch("/api/my-bookings/");
+            const d=await r.json();
 
-// ===== CHAT =====
-function openChat(){
-    window.location="/chat/"; // chuyển sang trang chat
-}
+            if (!d.data || d.data.length === 0) {
+                mybookings.innerHTML = `
+                    <div class="bg-white rounded-2xl card-shadow p-8 text-center">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p class="text-gray-500">Chưa có booking</p>
+                    </div>
+                `;
+                return;
+            }
 
-// ===== LOGOUT =====
-async function logout(){
-    await fetch("/api/logout/");
-    location="/";
-}
+            let h="";
 
-// INIT
-loadUser();
-loadMode();
+            d.data.forEach(b=>{
+                let badgeClass = "badge-pending";
+                let statusText = b.status;
+                
+                if (b.status === "applied") {
+                    badgeClass = "badge-applied";
+                    statusText = "Đã có CP ứng tuyển";
+                } else if (b.status === "confirmed") {
+                    badgeClass = "badge-confirmed";
+                    statusText = "Đã xác nhận";
+                } else if (b.status === "pending") {
+                    badgeClass = "badge-pending";
+                    statusText = "Chờ nhận";
+                }
 
-</script>
+                let confirmBtn="";
+                if(b.status==="applied"){
+                    confirmBtn=`
+                    <button onclick="showConfirmModal(${b.id})" class="btn-success w-full py-3 px-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2 mt-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Xác nhận CarePartner
+                    </button>`;
+                }
 
-</body>
+                h+=`
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-1">${b.service}</h4>
+                            <span class="badge ${badgeClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>${b.time}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="font-semibold text-sky-600">${b.gia} VND</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span>${b.carepartner || "Chưa có Care Partner"}</span>
+                        </div>
+                    </div>
+                    
+                    ${confirmBtn}
+                </div>
+                `;
+            });
+
+            mybookings.innerHTML=h;
+        }
+
+        //////////////////////////////
+        // CONFIRM CAREPARTNER (Original logic with modal)
+        //////////////////////////////
+        function showConfirmModal(id) {
+            pendingConfirmBookingId = id;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            pendingConfirmBookingId = null;
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        async function confirmParentConfirm() {
+            if (!pendingConfirmBookingId) return;
+            
+            await fetch("/api/parent-confirm/",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({booking_id: pendingConfirmBookingId})
+            });
+
+            closeConfirmModal();
+            loadMyBookings();
+        }
+
+        // Old function for backward compatibility (Original logic)
+        async function parentConfirm(id){
+            showConfirmModal(id);
+        }
+
+        //////////////////////////////
+        // CAREPARTNER JOBS (Original logic)
+        //////////////////////////////
+        async function loadOpenJobs(){
+            const r=await fetch("/api/jobs/open/");
+            const d=await r.json();
+
+            if (!d.data || d.data.length === 0) {
+                joblist.innerHTML = `
+                    <div class="bg-white rounded-2xl card-shadow p-8 text-center">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <p class="text-gray-500">Không có đơn</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let h="";
+            d.data.forEach(j=>{
+                h+=`
+                <div class="bg-white rounded-2xl card-shadow p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-1">${j.service}</h4>
+                            <p class="text-sm text-gray-500">Phụ huynh: ${j.parent}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm mb-4">
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>${j.thoi_gian}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="font-semibold text-green-600">${j.gia} VND</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="showAcceptModal(${j.id})" class="btn-success w-full py-3 px-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Nhận đơn
+                    </button>
+                </div>
+                `;
+            });
+
+            joblist.innerHTML=h;
+        }
+
+        //////////////////////////////
+        // ACCEPT JOB (Original logic with modal)
+        //////////////////////////////
+        function showAcceptModal(id) {
+            pendingAcceptJobId = id;
+            document.getElementById('acceptModal').classList.remove('hidden');
+        }
+
+        function closeAcceptModal() {
+            pendingAcceptJobId = null;
+            document.getElementById('acceptModal').classList.add('hidden');
+        }
+
+        async function confirmNhan() {
+            if (!pendingAcceptJobId) return;
+            
+            await fetch("/api/booking/nhan/",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({booking_id: pendingAcceptJobId})
+            });
+
+            closeAcceptModal();
+            loadOpenJobs();
+        }
+
+        // Old function for backward compatibility (Original logic)
+        async function nhan(id){
+            showAcceptModal(id);
+        }
+
+        //////////////////////////////
+        // TAB CONTROL (Original logic)
+        //////////////////////////////
+        function hideAll(){
+            homeSection.style.display="none";
+            activitySection.style.display="none";
+            accountSection.style.display="none";
+            
+            // Remove active class from all tabs
+            document.getElementById('tabHome').classList.remove('active');
+            document.getElementById('tabActivity').classList.remove('active');
+            document.getElementById('tabAccount').classList.remove('active');
+            
+            document.getElementById('tabHome').classList.add('text-gray-500');
+            document.getElementById('tabActivity').classList.add('text-gray-500');
+            document.getElementById('tabAccount').classList.add('text-gray-500');
+        }
+
+        function showHome(){
+            hideAll();
+            homeSection.style.display="block";
+            homeSection.classList.add('fade-in');
+            document.getElementById('tabHome').classList.add('active');
+            document.getElementById('tabHome').classList.remove('text-gray-500');
+        }
+
+        function showActivities(){
+            hideAll();
+            activitySection.style.display="block";
+            activitySection.classList.add('fade-in');
+            document.getElementById('tabActivity').classList.add('active');
+            document.getElementById('tabActivity').classList.remove('text-gray-500');
+        }
+
+        function showAccount(){
+            hideAll();
+            accountSection.style.display="block";
+            accountSection.classList.add('fade-in');
+            document.getElementById('tabAccount').classList.add('active');
+            document.getElementById('tabAccount').classList.remove('text-gray-500');
+        }
+
+        //////////////////////////////
+        // CHAT (Original logic)
+        //////////////////////////////
+        function openChat(){
+            window.location="/chat/";
+        }
+
+        //////////////////////////////
+        // LOGOUT (Original logic with modal)
+        //////////////////////////////
+        function showLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+
+        async function confirmLogout() {
+            await fetch("/api/logout/");
+            location="/";
+        }
+
+        // Old function for backward compatibility (Original logic)
+        async function logout(){
+            showLogoutModal();
+        }
+
+        //////////////////////////////
+        // MODE MODAL
+        //////////////////////////////
+        function showModeModal() {
+            document.getElementById('modeModal').classList.remove('hidden');
+        }
+
+        function closeModeModal() {
+            document.getElementById('modeModal').classList.add('hidden');
+        }
+
+        //////////////////////////////
+        // INIT (Original logic)
+        //////////////////////////////
+        loadUser();
+        loadMode();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c72084da6985e0a',t:'MTc2OTk1NTAyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

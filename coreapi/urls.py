@@ -138,5 +138,6 @@ path("api/tinhgia/", views.api_tinhgia),
 path("api/my-bookings/",views.api_my_bookings),
 path("api/parent-confirm/",views.api_parent_confirm),
 
+path("api/booking/<int:booking_id>/", views.api_booking_detail),
 
 ]
