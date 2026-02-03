@@ -1,25 +1,232 @@
-<h2>Chi tiết đơn hàng</h2>
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduCare Link - Chi tiết đặt lịch</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        body { 
+            background: linear-gradient(-45deg, #f6f7f8, #e0e7ff, #f0f9ff, #ffffff);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            min-height: 100dvh; 
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="font-display antialiased text-slate-900 bg-background-light">
+    <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+        <div class="sticky top-0 z-50 flex items-center justify-between bg-white/70 backdrop-blur-md p-4 pb-2">
+            <button onclick="window.location.href='/dashboard/'" class="text-slate-900 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-slate-900 text-lg font-bold flex-1 text-center pr-12">Chi tiết đặt lịch</h2>
+        </div>
 
-<p><b>Dịch vụ:</b> <span id="service"></span></p>
-<p><b>Thời gian:</b> <span id="time"></span></p>
-<p><b>Địa chỉ:</b> <span id="address"></span></p>
-<p><b>Mô tả trẻ:</b> <span id="child"></span></p>
-<p><b>Yêu cầu thêm:</b> <span id="extra"></span></p>
-<p><b>Giá:</b> <span id="price"></span> VND</p>
+        <div id="content-container" class="flex flex-col flex-1 px-4 pb-32">
+            <div id="loading" class="mt-20 flex flex-col items-center opacity-50">
+                <span class="material-symbols-outlined animate-spin text-4xl">progress_activity</span>
+                <p class="mt-2">Đang tải chi tiết...</p>
+            </div>
 
-<button id="acceptBtn">Nhận đơn</button>
+            <div id="booking-info" class="hidden mt-2">
+                <div class="flex items-stretch justify-between gap-4 rounded-xl glass-card p-5 shadow-sm">
+                    <div class="flex flex-col gap-3 flex-1">
+                        <div>
+                            <p class="text-primary text-xs font-bold uppercase tracking-wider mb-1">Dịch vụ</p>
+                            <h3 id="display-service" class="text-slate-900 text-lg font-bold leading-tight">...</h3>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-slate-400 text-[20px] mt-0.5">location_on</span>
+                                <p id="display-address" class="text-slate-600 text-sm font-medium leading-normal">...</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-slate-400 text-[20px] mt-0.5">schedule</span>
+                                <p id="display-time" class="text-slate-600 text-sm font-medium leading-normal">...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<script>
-async function load(){
-    const res = await fetch("/api/booking/{{id}}/");
-    const b = await res.json();
+                <div class="pt-6 pb-3">
+                    <h2 class="text-slate-900 tracking-tight text-[22px] font-bold leading-tight">Ứng viên nhận việc</h2>
+                </div>
 
-    service.innerText = b.service;
-    time.innerText = b.start + " → " + b.end;
-    address.innerText = b.address;
-    child.innerText = b.child_desc;
-    extra.innerText = b.extra_req;
-    price.innerText = b.price;
-}
-load();
-</script>
+                <div id="cp-card" class="hidden flex flex-col rounded-2xl glass-card shadow-lg overflow-hidden relative">
+                    <div class="h-24 w-full bg-gradient-to-r from-blue-100 to-indigo-100 absolute top-0 left-0"></div>
+                    <div class="relative px-6 pt-8 pb-6 flex flex-col items-center gap-4">
+                        <div class="relative">
+                            <div id="cp-avatar" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-28 h-28 border-4 border-white shadow-lg" style="background-image: url('https://img.freepik.com/free-vector/user-blue-gradient_78370-4692.jpg');"></div>
+                            <div class="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-md">
+                                <span class="material-symbols-outlined text-green-500 text-[24px]">verified</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center justify-center text-center">
+                            <h3 id="cp-name" class="text-slate-900 text-2xl font-bold leading-tight tracking-tight mb-1">...</h3>
+                            <div class="flex items-center gap-1.5 text-slate-500">
+                                <span class="material-symbols-outlined text-[18px]">school</span>
+                                <p id="cp-school" class="text-sm font-medium">...</p>
+                            </div>
+                        </div>
+                        <div class="w-full h-px bg-slate-200 my-1"></div>
+                        <div class="flex w-full items-center justify-between px-4">
+                            <div class="flex flex-col items-center gap-1 flex-1 border-r border-slate-200">
+                                <div class="flex items-center gap-1">
+                                    <span id="cp-rating" class="text-slate-900 text-xl font-bold">0.0</span>
+                                    <span class="material-symbols-outlined text-amber-400 text-[20px]">star</span>
+                                </div>
+                                <span class="text-xs text-slate-400 font-medium">Đánh giá</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 flex-1">
+                                <span id="cp-age" class="text-slate-900 text-xl font-bold">--</span>
+                                <span class="text-xs text-slate-400 font-medium">Độ tuổi</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 flex-1 border-l border-slate-200">
+                                <span id="cp-exp" class="text-slate-900 text-xl font-bold">---</span>
+                                <span class="text-xs text-slate-400 font-medium">Kinh nghiệm</span>
+                            </div>
+                        </div>
+                        <div id="cp-skills" class="flex flex-wrap justify-center gap-2 mt-2 w-full">
+                            </div>
+                    </div>
+                </div>
+
+                <div id="cp-empty" class="hidden p-10 text-center glass-card rounded-2xl opacity-60">
+                    <p>Chưa có ứng viên nào nhận đơn này.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="action-bar" class="hidden fixed bottom-0 left-0 w-full p-4 bg-white/90 backdrop-blur-lg border-t border-slate-100 z-40">
+            <div class="flex flex-col gap-3 max-w-md mx-auto">
+                <button id="confirm-btn" onclick="confirmPartner()" class="w-full h-14 flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white rounded-full font-bold text-base shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]">
+                    <span>Đồng ý chọn người này</span>
+                    <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lấy ID đơn hàng từ URL (Ví dụ: /booking/detail/?id=5)
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookingId = urlParams.get('id');
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function init() {
+            if (!bookingId) {
+                alert("Không tìm thấy mã đơn hàng.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/booking/${bookingId}/`); //
+                const b = await res.json(); //
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('booking-info').classList.remove('hidden');
+
+                // Hiển thị thông tin đơn
+                document.getElementById('display-service').innerText = b.service;
+                document.getElementById('display-address').innerText = b.address;
+                document.getElementById('display-time').innerText = b.desc || "Thông tin mô tả";
+
+                if (b.carepartner) {
+                    // Nếu đã có người ứng tuyển
+                    document.getElementById('cp-card').classList.remove('hidden');
+                    document.getElementById('cp-name').innerText = b.carepartner.name;
+                    document.getElementById('cp-school').innerText = b.carepartner.truong;
+                    document.getElementById('cp-rating').innerText = b.carepartner.rating.toFixed(1);
+                    
+                    if (b.status === 'applied') {
+                        document.getElementById('action-bar').classList.remove('hidden');
+                    }
+                } else {
+                    document.getElementById('cp-empty').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function confirmPartner() {
+            const btn = document.getElementById('confirm-btn');
+            btn.disabled = true;
+            btn.innerText = "Đang xác nhận...";
+
+            try {
+                const res = await fetch('/api/booking/confirm/', { //
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ booking_id: bookingId }) //
+                });
+                
+                const result = await res.json();
+                if (result.status === 'ok') {
+                    alert("Xác nhận CarePartner thành công!");
+                    window.location.href = '/dashboard/';
+                } else {
+                    alert("Lỗi: " + result.status);
+                    btn.disabled = false;
+                    btn.innerText = "Đồng ý chọn người này";
+                }
+            } catch (err) {
+                alert("Lỗi kết nối.");
+                btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

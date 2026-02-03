@@ -9,9 +9,7 @@ class ParentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     so_dien_thoai = models.CharField(max_length=20, blank=True)
     dia_chi_mac_dinh = models.CharField(max_length=300, blank=True)
-
-    def __str__(self):
-        return self.user.username
+    def __str__(self): return self.user.username
 
 
 # ===============================
@@ -19,30 +17,20 @@ class ParentProfile(models.Model):
 # ===============================
 class CarePartner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
     chuyen_nganh = models.CharField(max_length=200)
     truong = models.CharField(max_length=200)
     ky_nang = models.TextField()
-
     anh_cccd = models.ImageField(upload_to="cccd/")
     bang_cap = models.ImageField(upload_to="bangcap/")
-
     trang_thai = models.CharField(
         max_length=20,
-        choices=[
-            ("pending", "Chờ duyệt"),
-            ("approved", "Đã duyệt"),
-            ("rejected", "Từ chối"),
-        ],
+        choices=[("pending", "Chờ duyệt"), ("approved", "Đã duyệt"), ("rejected", "Từ chối")],
         default="pending"
     )
-
     rating_trung_binh = models.FloatField(default=0)
     tong_so_danh_gia = models.IntegerField(default=0)
     tong_job_hoan_thanh = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.user.username
+    def __str__(self): return self.user.username
 
 
 # ===============================
@@ -65,42 +53,34 @@ class Child(models.Model):
 class Service(models.Model):
     ten = models.CharField(max_length=200)
     mo_ta = models.TextField(blank=True)
-
-    # GIÁ THEO GIỜ
     gia_moi_gio = models.IntegerField(default=100000)
-
-    def __str__(self):
-        return f"{self.ten} - {self.gia_moi_gio}/giờ"
+    def __str__(self): return f"{self.ten} - {self.gia_moi_gio}/giờ"
 
 
 # ===============================
 # BOOKING
 # ===============================
 class Booking(models.Model):
-
+    # Thống nhất các trạng thái chuẩn bTaskee
     STATUS_CHOICES = [
-        ("pending","Pending"),
-        ("applied","Applied"),
-        ("confirmed","Confirmed"),
-        ("done","Done"),
+        ("pending", "Đang chờ"),      # Mới tạo, chưa có người nhận
+        ("applied", "Đã ứng tuyển"),   # CP đã bấm nhận, chờ PH duyệt
+        ("confirmed", "Đã xác nhận"),  # PH đã chốt người này
+        ("doing", "Đang thực hiện"),   # CP đang làm việc
+        ("done", "Hoàn thành"),       # Xong việc
+        ("cancelled", "Đã hủy"),      # Hủy đơn
     ]
 
-    parent = models.ForeignKey(User,on_delete=models.CASCADE,related_name="parent_bookings")
-    carepartner = models.ForeignKey(User,null=True,blank=True,on_delete=models.SET_NULL)
-
-    service = models.ForeignKey(Service,on_delete=models.CASCADE)
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="parent_bookings")
+    carepartner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="cp_bookings")
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
     dia_chi = models.CharField(max_length=255)
-
     gio_bat_dau = models.DateTimeField()
     gio_ket_thuc = models.DateTimeField()
-
     tre_mo_ta = models.TextField()
     yeu_cau = models.TextField(blank=True)
-
     gia_tam_tinh = models.IntegerField(default=0)
-
-    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default="pending")
-
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
 
 

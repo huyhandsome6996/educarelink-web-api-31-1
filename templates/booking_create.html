@@ -1,416 +1,292 @@
-<!doctype html>
-<html lang="vi" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đặt dịch vụ - EduCare Link</title>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
-  <style>
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduCare Link - Tạo yêu cầu</title>
+    
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "secondary-orange": "#f97316",
+                        "glass-border": "rgba(255, 255, 255, 0.4)",
+                        "glass-bg": "rgba(255, 255, 255, 0.65)",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    boxShadow: {
+                        "glass": "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+                        "soft": "0 10px 40px -10px rgba(0,0,0,0.08)",
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
         body {
-            box-sizing: border-box;
-            font-family: 'Be Vietnam Pro', sans-serif;
+            background: linear-gradient(-45deg, #f6f7f8, #e0e7ff, #f0f9ff, #ffffff);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            min-height: 100vh;
         }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        
-        .card-shadow {
-            box-shadow: 0 4px 15px -3px rgba(14, 165, 233, 0.1),
-                        0 2px 8px -2px rgba(0, 0, 0, 0.05);
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        
-        .input-focus {
-            transition: all 0.3s ease;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
-        
-        .input-focus:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px -6px rgba(14, 165, 233, 0.2);
+        .service-card.active {
+            border-color: #136dec !important;
+            background-color: rgba(19, 109, 236, 0.05) !important;
+            box-shadow: 0 4px 12px rgba(19, 109, 236, 0.15);
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -6px rgba(14, 165, 233, 0.4);
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .price-card {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-        }
-        
-        .loading-spinner {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.4s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .modal-overlay {
-            background: rgba(0, 0, 0, 0.5);
-            animation: fadeInBg 0.2s ease-out;
-        }
-        
-        @keyframes fadeInBg {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        
-        .success-checkmark {
-            animation: checkmark 0.6s ease-out;
-        }
-        
-        @keyframes checkmark {
-            0% { transform: scale(0) rotate(-45deg); }
-            50% { transform: scale(1.2) rotate(-45deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .error-message {
-            animation: shake 0.4s ease-out;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+        .service-card.active .icon-box {
+            background-color: #136dec !important;
+            color: #ffffff !important;
         }
     </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full gradient-bg">
-  <div class="h-full w-full overflow-y-auto py-6">
-   <div class="max-w-4xl mx-auto px-4 sm:px-6"><!-- Header -->
-    <div class="mb-6"><button onclick="window.location='/dashboard/'" class="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors mb-4">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg><span class="font-medium">Quay lại</span> </button>
-     <div class="flex items-center gap-4">
-      <div class="w-14 h-14 bg-gradient-to-br from-sky-400 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
-       <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-       </svg>
-      </div>
-      <div>
-       <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Đặt dịch vụ</h1>
-       <p class="text-gray-500 mt-1">Điền thông tin để tạo booking</p>
-      </div>
-     </div>
-    </div><!-- Main Form Card -->
-    <div class="bg-white rounded-3xl card-shadow p-6 sm:p-8 mb-6 fade-in"><!-- Time Section -->
-     <div class="mb-8">
-      <div class="flex items-center gap-2 mb-4">
-       <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-       </svg>
-       <h3 class="text-lg font-bold text-gray-800">Thời gian</h3>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-       <div><label for="start" class="block text-sm font-semibold text-gray-700 mb-2"> Bắt đầu <span class="text-red-500">*</span> </label> <input type="datetime-local" id="start" class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sky-400 focus:outline-none transition-all" onchange="autoCalculatePrice()">
-       </div>
-       <div><label for="end" class="block text-sm font-semibold text-gray-700 mb-2"> Kết thúc <span class="text-red-500">*</span> </label> <input type="datetime-local" id="end" class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sky-400 focus:outline-none transition-all" onchange="autoCalculatePrice()">
-       </div>
-      </div>
-     </div><!-- Address Section -->
-     <div class="mb-8">
-      <div class="flex items-center gap-2 mb-4">
-       <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-       </svg>
-       <h3 class="text-lg font-bold text-gray-800">Địa điểm</h3>
-      </div><label for="dia_chi" class="block text-sm font-semibold text-gray-700 mb-2"> Địa chỉ <span class="text-red-500">*</span> </label> <input type="text" id="dia_chi" placeholder="Nhập địa chỉ đầy đủ..." class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sky-400 focus:outline-none transition-all">
-     </div><!-- Child Info Section -->
-     <div class="mb-8">
-      <div class="flex items-center gap-2 mb-4">
-       <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-       </svg>
-       <h3 class="text-lg font-bold text-gray-800">Thông tin trẻ</h3>
-      </div><label for="tre_mo_ta" class="block text-sm font-semibold text-gray-700 mb-2"> Mô tả trẻ <span class="text-red-500">*</span> </label> <textarea id="tre_mo_ta" placeholder="Tuổi, sở thích, tính cách, lưu ý đặc biệt..." class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sky-400 focus:outline-none transition-all"></textarea>
-     </div><!-- Additional Requirements -->
-     <div class="mb-8">
-      <div class="flex items-center gap-2 mb-4">
-       <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-       </svg>
-       <h3 class="text-lg font-bold text-gray-800">Yêu cầu thêm</h3>
-      </div><label for="yeu_cau" class="block text-sm font-semibold text-gray-700 mb-2"> Ghi chú (không bắt buộc) </label> <textarea id="yeu_cau" placeholder="Các yêu cầu đặc biệt, lưu ý khác..." class="input-focus w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-sky-400 focus:outline-none transition-all"></textarea>
-     </div><!-- Price Card -->
-     <div id="priceCard" class="price-card rounded-2xl p-6 mb-6 hidden">
-      <div class="flex items-center justify-between">
-       <div class="flex items-center gap-3">
-        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div>
-         <p class="text-sm text-blue-700 font-medium">Giá tạm tính</p>
-         <p id="gia" class="text-3xl font-bold text-blue-900">0 VND</p>
+</head>
+
+<body class="text-slate-800 font-body relative pb-32">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-blue-300/20 rounded-full blur-[80px]"></div>
+        <div class="absolute bottom-[10%] right-[-10%] w-[250px] h-[250px] bg-orange-200/20 rounded-full blur-[60px]"></div>
+    </div>
+
+    <div class="relative z-10 mx-auto w-full max-w-[480px] flex flex-col">
+        <header class="flex items-center bg-white/70 backdrop-blur-md sticky top-0 z-50 p-4 border-b border-white/40 shadow-sm">
+            <button onclick="window.history.back()" class="size-10 flex items-center justify-center rounded-full hover:bg-white transition-colors">
+                <span class="material-symbols-outlined text-slate-600">arrow_back</span>
+            </button>
+            <h2 class="text-lg font-display font-bold flex-1 text-center pr-10 text-slate-800">Tạo yêu cầu mới</h2>
+        </header>
+
+        <div class="px-5 mt-6 flex flex-col gap-6">
+            
+            <div>
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 ml-1">1. Chọn dịch vụ</h3>
+                <div id="service-grid" class="grid grid-cols-2 gap-3">
+                    <div class="h-24 rounded-2xl bg-white/50 animate-pulse"></div>
+                    <div class="h-24 rounded-2xl bg-white/50 animate-pulse"></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl">
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">2. Thời gian</h3>
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-primary mb-1 block">Bắt đầu</label>
+                        <input id="start-time" type="datetime-local" class="w-full bg-white/50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-700 font-medium">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-primary mb-1 block">Kết thúc</label>
+                        <input id="end-time" type="datetime-local" class="w-full bg-white/50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-700 font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl">
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">3. Địa điểm</h3>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">location_on</span>
+                    <input id="address" type="text" class="w-full pl-10 pr-4 py-3 bg-white/50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium placeholder:text-slate-400" placeholder="Nhập địa chỉ nhà bạn...">
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl">
+                <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">4. Thông tin chi tiết</h3>
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1 block">Mô tả về bé *</label>
+                        <textarea id="child-desc" rows="3" class="w-full bg-white/50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400" placeholder="Tuổi, tính cách, những điều cần lưu ý..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1 block">Yêu cầu thêm</label>
+                        <textarea id="extra-req" rows="2" class="w-full bg-white/50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400" placeholder="Ví dụ: Biết nấu ăn, có xe máy..."></textarea>
+                    </div>
+                </div>
+            </div>
         </div>
-       </div>
-       <div id="priceLoading" class="hidden">
-        <svg class="loading-spinner w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30 70" />
-        </svg>
-       </div>
-      </div>
-     </div><!-- Error Message -->
-     <div id="errorMessage" class="hidden error-message bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6">
-      <div class="flex items-start gap-3">
-       <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-       </svg>
-       <div>
-        <p class="font-semibold text-red-800">Có lỗi xảy ra</p>
-        <p id="errorText" class="text-sm text-red-600 mt-1"></p>
-       </div>
-      </div>
-     </div><!-- Action Buttons -->
-     <div class="flex flex-col sm:flex-row gap-3"><button onclick="tinhGia()" id="calcButton" class="flex-1 py-4 px-6 bg-white border-2 border-sky-500 text-sky-600 rounded-xl font-semibold hover:bg-sky-50 transition-all flex items-center justify-center gap-2">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-       </svg><span id="calcButtonText">Tính giá</span> </button> <button onclick="gui()" id="submitButton" class="flex-1 btn-primary py-4 px-6 text-white rounded-xl font-semibold flex items-center justify-center gap-2" disabled>
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-       </svg><span id="submitButtonText">Gửi yêu cầu</span> </button>
-     </div>
     </div>
-   </div>
-  </div><!-- Success Modal -->
-  <div id="successModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-   <div class="modal-overlay flex items-center justify-center min-h-screen px-4">
-    <div class="modal-content bg-white rounded-3xl card-shadow max-w-md w-full p-8 text-center">
-     <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg success-checkmark">
-      <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-      </svg>
-     </div>
-     <h3 class="text-2xl font-bold text-gray-800 mb-3">Thành công!</h3>
-     <p class="text-gray-600 mb-6">Yêu cầu đặt dịch vụ của bạn đã được gửi. Chúng tôi sẽ tìm Care Partner phù hợp cho bạn.</p><button onclick="window.location='/dashboard/'" class="btn-primary w-full py-3 px-6 text-white rounded-xl font-semibold"> Về trang chủ </button>
+
+    <div class="fixed bottom-0 left-0 right-0 p-4 z-50">
+        <div class="mx-auto max-w-[480px]">
+            <div class="glass-card rounded-2xl p-4 shadow-xl border-t border-white/60 flex items-center justify-between gap-4">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tổng tạm tính</span>
+                    <div class="flex items-baseline gap-1">
+                        <span id="display-price" class="text-2xl font-display font-bold text-primary">0</span>
+                        <span class="text-sm font-bold text-primary">đ</span>
+                    </div>
+                    <span id="duration-text" class="text-[10px] font-medium text-slate-500 hidden">-- giờ</span>
+                </div>
+                
+                <button id="submit-btn" class="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:to-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                    Gửi yêu cầu
+                </button>
+            </div>
+        </div>
     </div>
-   </div>
-  </div>
-  <script>
-        const defaultConfig = {};
 
-        async function onConfigChange(config) {}
+    <script>
+        let selectedServiceId = null;
+        let finalPrice = 0;
 
-        function mapToCapabilities(config) {
-            return {
-                recolorables: [],
-                borderables: [],
-                fontEditable: undefined,
-                fontSizeable: undefined
-            };
-        }
-
-        function mapToEditPanelValues(config) {
-            return new Map();
-        }
-
-        if (window.elementSdk) {
-            window.elementSdk.init({
-                defaultConfig,
-                onConfigChange,
-                mapToCapabilities,
-                mapToEditPanelValues
-            });
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const service_id = urlParams.get("service");
-
-        let giaTam = 0;
-        let isCalculating = false;
-
-        // ===== AUTO CALCULATE PRICE =====
-        async function autoCalculatePrice() {
-            const startValue = document.getElementById("start").value;
-            const endValue = document.getElementById("end").value;
-            
-            if (startValue && endValue) {
-                await tinhGia();
-            }
-        }
-
-        // ===== TÍNH GIÁ (Original logic with UI updates) =====
-        async function tinhGia(){
-            if (isCalculating) return;
-            
-            const startValue = document.getElementById("start").value;
-            const endValue = document.getElementById("end").value;
-            
-            if (!startValue || !endValue) {
-                showError("Vui lòng chọn thời gian bắt đầu và kết thúc");
-                return;
-            }
-            
-            // Show loading
-            isCalculating = true;
-            document.getElementById("calcButton").disabled = true;
-            document.getElementById("calcButtonText").textContent = "Đang tính...";
-            document.getElementById("priceLoading").classList.remove("hidden");
-            document.getElementById("priceCard").classList.remove("hidden");
-            hideError();
-
-            try {
-                const r = await fetch("/api/tinhgia/",{
-                    method:"POST",
-                    headers:{
-                        "Content-Type":"application/json",
-                        "X-CSRFToken": getCookie("csrftoken")
-                    },
-                    body: JSON.stringify({
-                        service_id: service_id,
-                        start: startValue,
-                        end: endValue
-                    })
-                });
-
-                const d = await r.json();
-
-                if(d.status==="ok"){
-                    giaTam = d.gia;
-                    document.getElementById("gia").innerText = d.gia.toLocaleString('vi-VN') + " VND";
-                    document.getElementById("submitButton").disabled = false;
-                    document.getElementById("priceCard").classList.add("fade-in");
-                }else{
-                    showError("Không thể tính giá. Vui lòng kiểm tra lại thời gian.");
-                    giaTam = 0;
-                }
-            } catch (error) {
-                showError("Có lỗi xảy ra khi tính giá. Vui lòng thử lại.");
-                giaTam = 0;
-            } finally {
-                isCalculating = false;
-                document.getElementById("calcButton").disabled = false;
-                document.getElementById("calcButtonText").textContent = "Tính giá";
-                document.getElementById("priceLoading").classList.add("hidden");
-            }
-        }
-
-        // ===== GỬI BOOKING (Original logic with validation) =====
-        async function gui(){
-            // Validation
-            const startValue = document.getElementById("start").value;
-            const endValue = document.getElementById("end").value;
-            const diaChiValue = document.getElementById("dia_chi").value.trim();
-            const treMoTaValue = document.getElementById("tre_mo_ta").value.trim();
-
-            if (!startValue || !endValue) {
-                showError("Vui lòng chọn thời gian bắt đầu và kết thúc");
-                return;
-            }
-
-            if (!diaChiValue) {
-                showError("Vui lòng nhập địa chỉ");
-                return;
-            }
-
-            if (!treMoTaValue) {
-                showError("Vui lòng nhập mô tả về trẻ");
-                return;
-            }
-
-            if(giaTam==0){
-                showError("Vui lòng tính giá trước khi gửi yêu cầu");
-                return;
-            }
-
-            // Show loading
-            const submitButton = document.getElementById("submitButton");
-            submitButton.disabled = true;
-            document.getElementById("submitButtonText").textContent = "Đang gửi...";
-            hideError();
-
-            try {
-                const r = await fetch("/api/booking/create/",{
-                    method:"POST",
-                    headers:{
-                        "Content-Type":"application/json",
-                        "X-CSRFToken": getCookie("csrftoken")
-                    },
-                    body:JSON.stringify({
-                        service_id: service_id,
-                        start: startValue,
-                        end: endValue,
-                        dia_chi: diaChiValue,
-                        tre_mo_ta: treMoTaValue,
-                        yeu_cau: document.getElementById("yeu_cau").value.trim(),
-                        gia_tam_tinh: giaTam
-                    })
-                });
-
-                const d = await r.json();
-
-                if(d.status==="ok"){
-                    document.getElementById("successModal").classList.remove("hidden");
-                }else{
-                    showError("Không thể gửi yêu cầu. Vui lòng thử lại.");
-                    console.log(d);
-                }
-            } catch (error) {
-                showError("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại.");
-            } finally {
-                submitButton.disabled = false;
-                document.getElementById("submitButtonText").textContent = "Gửi yêu cầu";
-            }
-        }
-
-        // ===== HELPER FUNCTIONS =====
-        function showError(message) {
-            document.getElementById("errorText").textContent = message;
-            document.getElementById("errorMessage").classList.remove("hidden");
-            document.getElementById("errorMessage").scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-
-        function hideError() {
-            document.getElementById("errorMessage").classList.add("hidden");
-        }
-
-        // ===== LẤY CSRF TOKEN (Original logic) =====
         function getCookie(name) {
             let cookieValue = null;
-            if (document.cookie && document.cookie !== "") {
-                const cookies = document.cookie.split(";");
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i++) {
                     const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break;
                     }
                 }
             }
             return cookieValue;
         }
+
+        async function loadServices() {
+            const grid = document.getElementById('service-grid');
+            try {
+                const res = await fetch('/api/services/'); //
+                const result = await res.json(); //
+                
+                // Lấy service_id từ URL nếu có (để auto-select)
+                const urlParams = new URLSearchParams(window.location.search);
+                const preSelectedId = urlParams.get('service_id');
+
+                grid.innerHTML = result.data.map(s => `
+                    <div onclick="selectService(this, ${s.id})" 
+                         class="service-card group bg-white/60 border border-white rounded-2xl p-4 cursor-pointer transition-all hover:shadow-soft flex flex-col gap-3"
+                         id="service-${s.id}">
+                        <div class="icon-box size-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center transition-colors">
+                            <span class="material-symbols-outlined text-[24px]">child_care</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <h4 class="font-display font-bold text-slate-800 text-sm leading-tight">${s.ten}</h4>
+                            <p class="font-body text-xs font-semibold text-slate-500 mt-1">${s.gia_moi_gio.toLocaleString()}đ/h</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                if (preSelectedId) {
+                    const el = document.getElementById(`service-${preSelectedId}`);
+                    if (el) selectService(el, preSelectedId);
+                }
+
+            } catch (err) { grid.innerHTML = "Lỗi tải dịch vụ."; }
+        }
+
+        function selectService(el, id) {
+            document.querySelectorAll('.service-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedServiceId = id;
+            updatePrice();
+        }
+
+        async function updatePrice() {
+            const start = document.getElementById('start-time').value;
+            const end = document.getElementById('end-time').value;
+            const durationText = document.getElementById('duration-text');
+
+            if (!selectedServiceId || !start || !end) {
+                durationText.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/tinhgia/', { //
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ service_id: selectedServiceId, start, end }) //
+                });
+                const result = await res.json();
+                
+                if (result.status === 'ok') {
+                    finalPrice = result.gia;
+                    document.getElementById('display-price').innerText = finalPrice.toLocaleString();
+                    
+                    // Hiển thị số giờ
+                    const diffMs = new Date(end) - new Date(start);
+                    const diffHrs = (diffMs / 3600000).toFixed(1);
+                    if (diffHrs > 0) {
+                        durationText.innerText = `${diffHrs} tiếng`;
+                        durationText.classList.remove('hidden');
+                    }
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('submit-btn');
+            const data = {
+                service_id: selectedServiceId,
+                start: document.getElementById('start-time').value,
+                end: document.getElementById('end-time').value,
+                dia_chi: document.getElementById('address').value,
+                tre_mo_ta: document.getElementById('child-desc').value, //
+                yeu_cau: document.getElementById('extra-req').value, //
+                gia_tam_tinh: finalPrice
+            };
+
+            if (!data.service_id || !data.start || !data.end || !data.dia_chi || !data.tre_mo_ta) {
+                alert("Vui lòng điền đầy đủ các thông tin bắt buộc!"); return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm mr-2">progress_activity</span> Đang gửi...`;
+
+            try {
+                const res = await fetch('/api/booking/create/', { //
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify(data) //
+                });
+                const result = await res.json();
+                if (result.status === 'ok') {
+                    // Hiệu ứng thành công nhỏ trước khi chuyển trang
+                    btn.classList.remove('from-primary', 'to-blue-600');
+                    btn.classList.add('bg-green-500');
+                    btn.innerHTML = `<span class="material-symbols-outlined mr-2">check</span> Thành công!`;
+                    setTimeout(() => window.location.href = '/dashboard/', 1000);
+                } else { 
+                    alert("Lỗi: " + result.msg);
+                    btn.disabled = false;
+                    btn.innerText = "Gửi yêu cầu";
+                }
+            } catch (err) { 
+                alert("Lỗi kết nối.");
+                btn.disabled = false;
+                btn.innerText = "Gửi yêu cầu";
+            }
+        });
+
+        document.getElementById('start-time').addEventListener('change', updatePrice);
+        document.getElementById('end-time').addEventListener('change', updatePrice);
+        
+        // Khởi tạo
+        loadServices();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c71ff96930c5e0a',t:'MTc2OTk1NDY3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
