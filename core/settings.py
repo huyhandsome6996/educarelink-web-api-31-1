@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'coreapi',
+    'jazzmin'
 ]
 
 
@@ -128,3 +129,68 @@ STATIC_URL = '/static/'
 # Thêm dòng này vào ngay dưới
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# ====================================
+# JAZZMIN CONFIGURATION (EduCare Link)
+# ====================================
+
+JAZZMIN_SETTINGS = {
+    # Tiêu đề trên tab trình duyệt
+    "site_title": "EduCare Admin",
+    "site_header": "EduCare Link",
+    "site_brand": "EduCare Quản trị",
+    "welcome_sign": "Chào mừng quản trị viên EduCare",
+    "copyright": "EduCare Link Ltd",
+    
+    # Menu bên trái
+    "search_model": ["auth.User", "coreapi.Booking"], # Cho phép tìm kiếm nhanh User và Booking
+    "topmenu_links": [
+        {"name": "Trang chủ App", "url": "home", "permissions": ["auth.view_user"]},
+    ],
+    
+    # Cấu trúc Menu
+    "order_with_respect_to": ["coreapi", "auth"], # Ưu tiên hiển thị App coreapi trước
+    
+    # Icon cho các bảng (Dùng FontAwesome)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "coreapi.Booking": "fas fa-calendar-check",
+        "coreapi.CarePartner": "fas fa-user-nurse",
+        "coreapi.ParentProfile": "fas fa-user-tie",
+        "coreapi.Child": "fas fa-baby",
+        "coreapi.Service": "fas fa-list",
+        "coreapi.Review": "fas fa-star",
+        "coreapi.ChatSession": "fas fa-comments",
+    },
+}
+
+# Tùy chỉnh giao diện (Màu sắc)
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-success",  # Màu xanh lá cho logo
+    "accent": "accent-success",        # Màu điểm nhấn xanh lá
+    "navbar": "navbar-success navbar-dark", # Thanh menu trên cùng màu xanh
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,             # Menu trái cố định
+    "sidebar": "sidebar-light-success", # Menu trái màu sáng, highlight xanh
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "main_bg_color": None,
+    "button_classes": {
+        "primary": "btn-success",      # Nút bấm chính màu xanh
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
