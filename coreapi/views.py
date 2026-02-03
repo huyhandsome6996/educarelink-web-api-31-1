@@ -36,6 +36,7 @@ def trang_tao_booking(request): return render(request, "booking_create.html")
 def trang_jobs(request): return render(request, "booking_jobs.html")
 def trang_ho_so(request): return render(request, "profile.html")
 def trang_chi_tiet_booking(request): return render(request, "booking_detail.html")
+def trang_chat(request): return render(request, "chat.html")
 # ======================================================
 # 2. AUTHENTICATION API
 # ======================================================

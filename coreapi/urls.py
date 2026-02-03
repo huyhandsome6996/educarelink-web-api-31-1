@@ -38,4 +38,5 @@ urlpatterns = [
     
     path('profile/', views.trang_ho_so),
     path('api/my-jobs/', views.api_my_jobs),
+    path('chat/', views.trang_chat),
 ]

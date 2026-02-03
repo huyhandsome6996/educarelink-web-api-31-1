@@ -116,7 +116,7 @@
                             <p class="text-sm text-slate-600 leading-relaxed font-medium">Trợ lý AI sẵn sàng giải đáp thắc mắc.</p>
                         </div>
                     </div>
-                    <button onclick="openTidioChat()" class="mt-4 w-full h-12 flex items-center justify-center gap-2 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-blue-500/25 hover:bg-blue-600 active:scale-[0.98] transition-all">
+                    <button onclick="window.location.href='/chat/'" class="mt-4 w-full h-12 flex items-center justify-center gap-2 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-blue-500/25 hover:bg-blue-600 active:scale-[0.98] transition-all">
                         <span class="material-symbols-outlined text-[20px]">chat_bubble</span> Trò chuyện ngay
                     </button>
                 </div>
@@ -177,10 +177,9 @@
             return cookieValue;
         }
 
-        // Map trạng thái sang tiếng Việt và màu sắc
         const STATUS_MAP = {
             'pending': { text: 'Đang tìm người...', color: 'text-slate-500 bg-slate-100' },
-            'applied': { text: 'Có người ứng tuyển!', color: 'text-white bg-orange-500 animate-pulse' }, // Highlight
+            'applied': { text: 'Có người ứng tuyển!', color: 'text-white bg-orange-500 animate-pulse' }, 
             'confirmed': { text: 'Đã xác nhận', color: 'text-blue-600 bg-blue-100' },
             'doing': { text: 'Đang thực hiện', color: 'text-green-600 bg-green-100' },
             'done': { text: 'Hoàn thành', color: 'text-slate-600 bg-slate-200' }
@@ -188,20 +187,17 @@
 
         async function initDashboard() {
             try {
-                // 1. User Info
-                const userRes = await fetch('/api/me/'); //
+                const userRes = await fetch('/api/me/'); 
                 const userData = await userRes.json();
                 if (!userData.login) { window.location.href = '/dangnhap/'; return; }
 
                 document.getElementById('userName').innerText = `Chào bạn, ${userData.username}`;
                 
-                // 2. Mode
                 const modeRes = await fetch('/api/mode/');
                 const modeData = await modeRes.json();
                 currentMode = modeData.mode || "parent";
                 document.getElementById('userRole').innerText = currentMode === "parent" ? "Chế độ: Phụ huynh" : "Chế độ: Care Partner";
 
-                // 3. UI Toggles
                 const btnSwitch = document.getElementById('btnSwitch');
                 const btnReg = document.getElementById('btnRegisterPartner');
                 const bookingSec = document.getElementById('bookingSection');
@@ -216,7 +212,7 @@
 
                 if (currentMode === "parent") {
                     bookingSec.classList.remove('hidden');
-                    loadMyBookings(); // Tải danh sách đơn
+                    loadMyBookings();
                 }
 
                 loadServices();
@@ -246,13 +242,12 @@
         async function loadMyBookings() {
             const list = document.getElementById('bookingList');
             try {
-                const res = await fetch('/api/my-bookings/'); //
+                const res = await fetch('/api/my-bookings/'); 
                 const result = await res.json();
                 
                 if (result.data && result.data.length > 0) {
                     list.innerHTML = result.data.map(b => {
                         const st = STATUS_MAP[b.status] || { text: b.status, color: 'bg-gray-100 text-gray-500' };
-                        // Nếu status là 'applied', thêm class viền cam để nổi bật
                         const extraClass = b.status === 'applied' ? 'action-required shadow-lg' : 'hover:bg-white/90';
                         
                         return `
@@ -281,7 +276,7 @@
 
         async function handleSwitchMode() {
             const targetMode = currentMode === "parent" ? "carepartner" : "parent";
-            const res = await fetch('/api/mode/switch/', { //
+            const res = await fetch('/api/mode/switch/', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
                 body: JSON.stringify({ mode: targetMode })
@@ -296,11 +291,6 @@
                 await fetch('/api/logout/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
                 window.location.href = '/dangnhap/';
             }
-        }
-
-        function openTidioChat() {
-            if (window.tidioChatApi) window.tidioChatApi.open();
-            else alert("Chatbot đang kết nối...");
         }
 
         document.addEventListener('DOMContentLoaded', initDashboard);

@@ -1,67 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html class="light" lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Chatbot tư vấn</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduCare Link - Hỗ trợ trực tuyến</title>
+    
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                    },
+                    fontFamily: { "display": ["Lexend", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(-45deg, #f6f7f8, #e0e7ff, #f0f9ff, #ffffff);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            min-height: 100vh;
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* Hiệu ứng sóng lan tỏa quanh nút chat */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            animation: ripple 2s infinite;
+            background-color: rgba(19, 109, 236, 0.4);
+            z-index: -1;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+    </style>
 </head>
 
-<body>
+<body class="font-display text-slate-800 h-screen flex flex-col relative overflow-hidden">
+    
+    <div class="absolute top-6 left-6 z-50">
+        <button onclick="window.history.back()" class="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-sm hover:bg-white transition-all text-slate-600 font-bold text-sm border border-slate-200">
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+            Quay lại
+        </button>
+    </div>
 
-<h2>Chatbot tư vấn</h2>
+    <div class="flex-1 flex flex-col items-center justify-center p-6 text-center z-10">
+        <div class="relative bg-white/60 backdrop-blur-xl border border-white/50 p-8 rounded-[32px] shadow-xl max-w-sm w-full flex flex-col items-center">
+            
+            <div class="relative mb-6">
+                <div class="size-24 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <span class="material-symbols-outlined text-[48px]">smart_toy</span>
+                </div>
+                <div class="ripple inset-0"></div>
+            </div>
 
-<div id="chatbox" style="
-border:1px solid #000;
-height:300px;
-overflow:auto;
-padding:10px;
-margin-bottom:10px;
-"></div>
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">Trung tâm hỗ trợ</h1>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">
+                Hệ thống AI đang kết nối...<br>
+                Cửa sổ chat sẽ tự động mở ra ngay bây giờ.
+            </p>
 
-<input id="msg" placeholder="Nhập tin nhắn..." style="width:70%;">
-<button onclick="sendMsg()">Gửi</button>
+            <button onclick="forceOpenChat()" class="w-full h-12 flex items-center justify-center gap-2 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-blue-500/25 hover:bg-blue-600 active:scale-[0.98] transition-all">
+                <span class="material-symbols-outlined">chat</span>
+                Mở khung chat
+            </button>
+        </div>
+    </div>
 
-<script>
+    <div class="absolute bottom-6 w-full text-center text-slate-400 text-xs font-medium z-0">
+        Powered by EduCare AI Technology
+    </div>
 
-async function sendMsg(){
-    let input=document.getElementById("msg");
-    let text=input.value.trim();
+    <script>
+        // Hàm mở chat
+        function forceOpenChat() {
+            if (window.tidioChatApi) {
+                window.tidioChatApi.open();
+                window.tidioChatApi.show(); // Đảm bảo nó hiện ra nếu đang bị ẩn
+            } else {
+                alert("Đang tải dữ liệu chat, vui lòng đợi thêm 2 giây...");
+            }
+        }
 
-    if(!text) return;
+        // Tự động mở khi trang tải xong
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra mỗi 0.5 giây xem Tidio đã sẵn sàng chưa
+            let checkTidio = setInterval(function() {
+                if (window.tidioChatApi) {
+                    window.tidioChatApi.open();
+                    clearInterval(checkTidio); // Dừng kiểm tra khi đã mở được
+                }
+            }, 500);
 
-    let box=document.getElementById("chatbox");
-
-    box.innerHTML += "<b>Bạn:</b> "+text+"<br>";
-    input.value="";
-
-    try{
-        let res=await fetch("/api/chat/",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                message:text
-            })
+            // Phòng trường hợp chờ quá lâu (sau 5s tự hủy check)
+            setTimeout(() => clearInterval(checkTidio), 5000);
         });
+    </script>
 
-        let data=await res.json();
-
-        box.innerHTML += "<b>Bot:</b> "+(data.reply || "Không có phản hồi")+"<br>";
-
-    }catch(err){
-        box.innerHTML += "<b>Bot:</b> Lỗi kết nối server<br>";
-    }
-
-    box.scrollTop=box.scrollHeight;
-}
-
-document.getElementById("msg").addEventListener("keypress",function(e){
-    if(e.key==="Enter"){
-        sendMsg();
-    }
-});
-
-</script>
-
+    <script src="//code.tidio.co/agp7pfotskfgoyuspsa2uqwagyywfvp9.js" async></script>
 </body>
 </html>
